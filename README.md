@@ -5,7 +5,7 @@ Este repositorio contiene utilidades para simulación.
 Las simulaciones por defecto abarcan 500 horas de operación (alrededor de
 21 días). Las métricas impresas convierten esa duración a días para facilitar
 la interpretación. Por defecto se consideran hasta 20 autobuses en la estación.
-La estación cuenta con 15 cargadores y 25 baterías (20 de ellas cargadas al
+La estación cuenta con 21 cargadores y 41 baterías (33 de ellas cargadas al
 inicio).
 
 ## Gráfico de eficiencia operativa

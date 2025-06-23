@@ -159,10 +159,19 @@ class EstacionIntercambio:
 
 
 # Procesos para simular la llegada de autobuses
-def llegada_autobuses(env, estacion, max_autobuses, intervalo=0.25, tiempo_ruta=4):
-    """Genera la llegada inicial de autobuses y crea procesos cíclicos."""
+def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=4):
+    """Genera la llegada inicial de autobuses y crea procesos cíclicos.
+
+    Durante horas pico (7:00-9:00 y 16:00-18:00) los autobuses llegan cada
+    6 minutos. El resto del día la frecuencia es de 12 minutos.
+    """
     yield env.timeout(5)  # Los autobuses comienzan a llegar a las 5:00 AM
     for autobuses_id in range(1, max_autobuses + 1):
+        hora_actual = env.now % 24
+        if 7 <= hora_actual < 9 or 16 <= hora_actual < 18:
+            intervalo = 6 / 60  # 6 minutos
+        else:
+            intervalo = 12 / 60  # 12 minutos
         yield env.timeout(intervalo)
         hora_actual = int(env.now % 24)
         soc_inicial = calcular_soc_inicial(hora_actual)
@@ -221,7 +230,6 @@ def proceso_autobus(env, estacion, autobuses_id, soc_inicial, tiempo_ruta):
 def ejecutar_simulacion(
     max_autobuses=param_simulacion.max_autobuses,
     duracion=param_simulacion.duracion,
-    intervalo_llegada=0.25,
     tiempo_ruta=4,
 ):
     """Ejecuta la simulación y devuelve la estación resultante.
@@ -238,7 +246,6 @@ def ejecutar_simulacion(
             env,
             estacion,
             max_autobuses=max_autobuses,
-            intervalo=intervalo_llegada,
             tiempo_ruta=tiempo_ruta,
         )
     )
