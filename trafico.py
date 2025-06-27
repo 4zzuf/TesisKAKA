@@ -64,4 +64,3 @@ def graficar_trafico(factores=FACTORES_LIMA):
 
 if __name__ == "__main__":  # pragma: no cover
     graficar_trafico()
-main

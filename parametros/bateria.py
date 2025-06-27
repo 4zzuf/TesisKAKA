@@ -42,7 +42,6 @@ class ParametrosBateria:
             # De 140 a 50 kW
             return 140 - (soc - 55) * (90 / 25)
         return 50
- main
 
     def tiempo_carga(self, soc_inicial, soc_objetivo=None):
         """Tiempo necesario para cargar desde ``soc_inicial`` hasta el objetivo."""
