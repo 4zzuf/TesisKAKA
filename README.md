@@ -2,11 +2,18 @@
 
 Este repositorio contiene utilidades para simulación.
 
-Las simulaciones por defecto abarcan 500 horas de operación (alrededor de
-21 días). Las métricas impresas convierten esa duración a días para facilitar
-la interpretación. Por defecto se consideran hasta 20 autobuses en la estación.
+d1xt4j-codex/cambiar-frecuencia-de-salida-de-los-buses
+Las simulaciones por defecto abarcan 21 días de operación. Internamente esa
+duración se convierte a horas cuando es necesario, pero la entrada y las
+métricas se expresan en días para mayor claridad. Por defecto se consideran
+hasta 20 autobuses en la estación.
+
+main
 La estación cuenta con 21 cargadores y 41 baterías (33 de ellas cargadas al
 inicio).
+Durante los fines de semana la demanda de autobuses se reduce a la mitad,
+por lo que cada ruta dura ocho horas en lugar de cuatro. Las horas de entrada
+y salida se registran en formato ``hh:mm``.
 
 ## Gráfico de eficiencia operativa
 
@@ -35,7 +42,7 @@ El último gráfico presenta dos barras con el costo promedio por hora al operar
 con gas natural frente a electricidad.
 
 Los valores se escalan a un mes de operación para evitar distorsiones cuando
-la simulación se ejecuta por 500 horas.
+la simulación se ejecuta por 21 días.
 
 Para que los costos crezcan de forma continua al aumentar la flota,
 `graficos_costos.py` amplía temporalmente la capacidad de carga de la estación
@@ -44,7 +51,10 @@ costos al pasar de cuatro a cinco vehículos ni la estabilización por encima de
 diez.
 
 El costo de operar con gas natural se calcula aparte empleando el consumo
-promedio de cada autobús y no depende de los valores de electricidad.
+promedio de cada autobús y no depende de los valores de electricidad. Para
+estas simulaciones se considera un uso de 100 kWh por hora, lo que equivale a
+unos 200 000 kWh para una flota de veinte vehículos durante 21 días de
+operación.
 
 Ejecuta:
 
