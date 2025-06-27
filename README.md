@@ -7,6 +7,15 @@ Las simulaciones por defecto abarcan 21 días de operación. Internamente esa
 duración se convierte a horas cuando es necesario, pero la entrada y las
 métricas se expresan en días para mayor claridad. Por defecto se consideran
 hasta 20 autobuses en la estación.
+## Instalación
+
+Instala las dependencias con:
+
+```bash
+
+pip install -r requirements.txt
+```
+
 
 main
 La estación cuenta con 21 cargadores y 41 baterías (33 de ellas cargadas al
@@ -84,7 +93,7 @@ python graficos_diarios.py
 
 ## Ejecutar las pruebas
 
-Instala `pytest` y ejecuta las pruebas con:
+Instala los requisitos y ejecuta las pruebas con:
 
 ```bash
 pytest
