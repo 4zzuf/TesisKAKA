@@ -91,6 +91,23 @@ simulado:
 python graficos_diarios.py
 ```
 
+## Simulación desde la línea de comandos
+
+El módulo `cli.py` permite ejecutar la simulación ajustando los parámetros
+básicos desde la terminal. Por ejemplo, para simular 30 días con 25 autobuses y
+una estación de 30 cargadores:
+
+```bash
+python cli.py --dias 30 --max-autobuses 25 --capacidad-estacion 30
+```
+
+También es posible cambiar la cantidad total de baterías o la semilla
+aleatoria:
+
+```bash
+python cli.py --total-baterias 60 --baterias-iniciales 50 --semilla 123
+```
+
 ## Ejecutar las pruebas
 
 Instala los requisitos y ejecuta las pruebas con:
