@@ -5,6 +5,18 @@ class ParametrosBateria:
         self.capacidad = capacidad
         # El SoC objetivo se reduce a 90 % por defecto
         self.soc_objetivo = soc_objetivo
+        # Coordenadas (SoC, potencia) que definen la curva de carga. Se
+        # interpolan linealmente para obtener la potencia en valores
+        # intermedios.  Estos puntos siguen el comportamiento solicitado:
+        # - 0 a 20 %  : 50 kW → 150 kW
+        # - 20 a 55 % : 150 kW → 140 kW
+        # - 55 a 80 % : 140 kW → 50 kW
+        self.puntos_curva = [
+            (0, 50),
+            (20, 150),
+            (55, 140),
+            (80, 50),
+        ]
 
     def actualizar(self, potencia=None, capacidad=None, soc_objetivo=None):
         """Actualiza los valores de la batería según se necesite."""
@@ -18,6 +30,7 @@ class ParametrosBateria:
 
     def potencia_carga(self, soc):
         """Devuelve la potencia de carga en kW para el SoC dado."""
+
         soc = max(0, min(soc, 100))
         if soc < 20:
             # De 50 a 150 kW
@@ -29,6 +42,7 @@ class ParametrosBateria:
             # De 140 a 50 kW
             return 140 - (soc - 55) * (90 / 25)
         return 50
+ main
 
     def tiempo_carga(self, soc_inicial, soc_objetivo=None):
         """Tiempo necesario para cargar desde ``soc_inicial`` hasta el objetivo."""

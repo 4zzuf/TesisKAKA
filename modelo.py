@@ -21,10 +21,13 @@ param_simulacion = ParametrosSimulacion()
 # Controla la verbosidad de la simulación
 VERBOSE = True
 
-# Función para formatear horas decimales a formato hh:mm
+# Función para formatear horas decimales incluyendo el día de simulación
 def formato_hora(horas_decimales):
-    horas, minutos = divmod(horas_decimales * 60, 60)
-    return f"{int(horas):02}:{int(minutos):02}"
+    """Devuelve un string "Día DD hh:mm" para la hora dada."""
+    dia = int(horas_decimales // 24) + 1
+    horas_totales = horas_decimales % 24
+    horas, minutos = divmod(horas_totales * 60, 60)
+    return f"Día {dia:02} {int(horas):02}:{int(minutos):02}"
 
 def es_fin_de_semana(tiempo):
     """Determina si la hora de simulación corresponde a fin de semana."""
