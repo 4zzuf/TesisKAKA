@@ -24,6 +24,11 @@ def formato_hora(horas_decimales):
     horas, minutos = divmod(horas_decimales * 60, 60)
     return f"{int(horas):02}:{int(minutos):02}"
 
+def es_fin_de_semana(tiempo):
+    """Determina si la hora de simulación corresponde a fin de semana."""
+    dia_semana = int(tiempo // 24) % 7
+    return dia_semana >= 5
+
 def calcular_soc_inicial(hora_actual):
     """Calcula el SoC inicial basado en la hora actual."""
     if 7 <= hora_actual < 9 or 18 <= hora_actual < 20:  # Hora punta de autobuses
@@ -68,7 +73,8 @@ class EstacionIntercambio:
         self.energia_fuera_punta_autobuses = 0  # Energía consumida fuera de hora punta por autobuses
         self.energia_punta_electrica = 0  # Energía consumida en hora punta de electricidad
         self.intercambios_realizados = 0  # Cantidad de reemplazos efectuados
-        self.registro_intercambios = []  # Historial de intercambios (tiempo y energia)
+        # Historial de intercambios (día, hora, energía)
+        self.registro_intercambios = []
 
         # Costo de cargar las baterías iniciales
         self.cargar_baterias_iniciales()
@@ -106,7 +112,9 @@ class EstacionIntercambio:
             )
         yield self.env.timeout(tiempo_reemplazo)
         self.intercambios_realizados += 1
-        self.registro_intercambios.append((self.env.now, capacidad_requerida))
+        dia_actual = int(self.env.now // 24)
+        hora_registro = formato_hora(self.env.now)
+        self.registro_intercambios.append((dia_actual, hora_registro, capacidad_requerida))
 
         # Clasificar consumo de energía según hora punta de autobuses
         if 7 <= hora_actual < 9 or 18 <= hora_actual < 20:
@@ -203,9 +211,10 @@ def proceso_autobus(env, estacion, autobuses_id, soc_inicial, tiempo_ruta):
             )
 
         # El autobús sale a su ruta y regresa con la batería descargada
-        yield env.timeout(tiempo_ruta)
+        duracion_ruta = tiempo_ruta * 2 if es_fin_de_semana(env.now) else tiempo_ruta
+        yield env.timeout(duracion_ruta)
         # Consumo de gas equivalente durante la ruta
-        energia_gas = param_operacion.consumo_gas_hora * tiempo_ruta
+        energia_gas = param_operacion.consumo_gas_hora * duracion_ruta
         estacion.energia_total_gas += energia_gas
         estacion.costo_total_gas += energia_gas * param_economicos.costo_gas_kwh
         soc_inicial = random.uniform(30, 40)
@@ -248,7 +257,7 @@ def ejecutar_simulacion(
 
 def imprimir_resultados(estacion):
     """Muestra por pantalla los resultados de la simulación."""
-    dias = param_simulacion.duracion / 24
+    dias = param_simulacion.dias
     print(f"\nResultados para {dias:.1f} d\u00edas de operaci\u00f3n")
     print(
         f"\nConsumo total de energía en hora punta de autobuses: {estacion.energia_punta_autobuses:.2f} kWh"

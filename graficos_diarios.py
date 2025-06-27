@@ -10,11 +10,10 @@ def main():
     estacion = modelo.ejecutar_simulacion()
     modelo.VERBOSE = anterior
 
-    dias = int(param_simulacion.duracion // 24)
+    dias = param_simulacion.dias
     intercambios = [0] * (dias + 1)
     energia = [0.0] * (dias + 1)
-    for tiempo, energia_swap in estacion.registro_intercambios:
-        dia = int(tiempo // 24)
+    for dia, _, energia_swap in estacion.registro_intercambios:
         if dia <= dias:
             intercambios[dia] += 1
             energia[dia] += energia_swap

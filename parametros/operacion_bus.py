@@ -2,7 +2,7 @@ class ParametrosOperacionBus:
     """Parámetros de operación del autobús."""
 
     def __init__(self, costo_operacion_hora=50, penalizacion_espera=10,
-                 consumo_gas_hora=300):
+                 consumo_gas_hora=100):
         self.costo_operacion_hora = costo_operacion_hora
         self.penalizacion_espera = penalizacion_espera
         # Energía equivalente que consumiría un autobús a gas por hora
