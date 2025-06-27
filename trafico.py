@@ -42,7 +42,6 @@ def factor_trafico(hora, factores=FACTORES_LIMA):
     hora_int = int(hora) % 24
     return factores.get(hora_int, 1.0)
 
-
 def graficar_trafico(factores=FACTORES_LIMA):
     """Muestra un gráfico con la evolución diaria del tráfico."""
     try:
@@ -65,3 +64,4 @@ def graficar_trafico(factores=FACTORES_LIMA):
 
 if __name__ == "__main__":  # pragma: no cover
     graficar_trafico()
+main

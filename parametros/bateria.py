@@ -30,15 +30,19 @@ class ParametrosBateria:
 
     def potencia_carga(self, soc):
         """Devuelve la potencia de carga en kW para el SoC dado."""
-        soc = max(0.0, min(float(soc), 100.0))
-        puntos = self.puntos_curva
-        for i in range(len(puntos) - 1):
-            x0, y0 = puntos[i]
-            x1, y1 = puntos[i + 1]
-            if soc <= x1:
-                # Interpolación lineal entre los puntos
-                return y0 + (y1 - y0) * (soc - x0) / (x1 - x0)
-        return puntos[-1][1]
+
+        soc = max(0, min(soc, 100))
+        if soc < 20:
+            # De 50 a 150 kW
+            return 50 + (soc / 20) * 100
+        if soc < 55:
+            # De 150 a 140 kW
+            return 150 - (soc - 20) * (10 / 35)
+        if soc < 80:
+            # De 140 a 50 kW
+            return 140 - (soc - 55) * (90 / 25)
+        return 50
+ main
 
     def tiempo_carga(self, soc_inicial, soc_objetivo=None):
         """Tiempo necesario para cargar desde ``soc_inicial`` hasta el objetivo."""
