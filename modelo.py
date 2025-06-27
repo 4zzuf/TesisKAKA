@@ -270,35 +270,39 @@ def ejecutar_simulacion(
     return estacion
 
 
-def imprimir_resultados(estacion):
-    """Muestra por pantalla los resultados de la simulación."""
+def formatear_resultados(estacion):
+    """Devuelve una lista con los textos de los resultados."""
     dias = param_simulacion.dias
-    print(f"\nResultados para {dias:.1f} d\u00edas de operaci\u00f3n")
-    print(
-        f"\nConsumo total de energía en hora punta de autobuses: {estacion.energia_punta_autobuses:.2f} kWh"
-    )
-    print(
-        f"Consumo total de energía fuera de hora punta de autobuses: {estacion.energia_fuera_punta_autobuses:.2f} kWh"
-    )
-    print(
-        f"Consumo total de energía en hora punta de electricidad: {estacion.energia_punta_electrica:.2f} kWh"
-    )
-    print(f"Tiempo total de espera acumulado: {formato_hora(estacion.tiempo_espera_total)}")
-    print(f"Costo total de operación (eléctrico): S/. {estacion.costo_total_electrico:.2f}")
-    print(f"\nCosto total usando electricidad: S/. {estacion.costo_total_electrico:.2f}")
-    print(f"Costo total usando gas natural: S/. {estacion.costo_total_gas:.2f}")
+    lines = [
+        f"Resultados para {dias:.1f} d\u00edas de operaci\u00f3n",
+        f"Consumo total de energ\u00eda en hora punta de autobuses: {estacion.energia_punta_autobuses:.2f} kWh",
+        f"Consumo total de energ\u00eda fuera de hora punta de autobuses: {estacion.energia_fuera_punta_autobuses:.2f} kWh",
+        f"Consumo total de energ\u00eda en hora punta de electricidad: {estacion.energia_punta_electrica:.2f} kWh",
+        f"Tiempo total de espera acumulado: {formato_hora(estacion.tiempo_espera_total)}",
+        f"Costo total de operaci\u00f3n (el\u00e9ctrico): S/. {estacion.costo_total_electrico:.2f}",
+        f"Costo total de operaci\u00f3n (gas natural): S/. {estacion.costo_total_gas:.2f}",
+    ]
 
     if estacion.costo_total_electrico < estacion.costo_total_gas:
-        print("Es más barato operar con electricidad.")
+        lines.append("Es m\u00e1s barato operar con electricidad.")
     else:
-        print("Es más barato operar con gas natural.")
+        lines.append("Es m\u00e1s barato operar con gas natural.")
 
     emisiones_elec = estacion.energia_total_cargada * param_economicos.factor_co2_elec
     emisiones_gas = estacion.energia_total_gas * param_economicos.factor_co2_gas
     ahorro = emisiones_gas - emisiones_elec
-    print(f"Emisiones con electricidad: {emisiones_elec:.2f} kg CO2")
-    print(f"Emisiones con gas natural: {emisiones_gas:.2f} kg CO2")
-    print(f"Ahorro de CO2: {ahorro:.2f} kg")
+    lines.extend([
+        f"Emisiones con electricidad: {emisiones_elec:.2f} kg CO2",
+        f"Emisiones con gas natural: {emisiones_gas:.2f} kg CO2",
+        f"Ahorro de CO2: {ahorro:.2f} kg",
+    ])
+    return lines
+
+
+def imprimir_resultados(estacion):
+    """Muestra por pantalla los resultados de la simulación."""
+    for line in formatear_resultados(estacion):
+        print(line)
 
 
 if __name__ == "__main__":

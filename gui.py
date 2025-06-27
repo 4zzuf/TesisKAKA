@@ -23,39 +23,7 @@ class SimulacionWorker(QtCore.QObject):
             tiempo_ruta=self._tiempo_ruta,
         )
 
-        r = []
-        dias = modelo.param_simulacion.dias
-        r.append(f"Resultados para {dias:.1f} d\u00edas de operaci\u00f3n")
-        r.append(
-            f"Consumo total de energ\u00eda en hora punta de autobuses: {estacion.energia_punta_autobuses:.2f} kWh"
-        )
-        r.append(
-            f"Consumo total de energ\u00eda fuera de hora punta de autobuses: {estacion.energia_fuera_punta_autobuses:.2f} kWh"
-        )
-        r.append(
-            f"Consumo total de energ\u00eda en hora punta de electricidad: {estacion.energia_punta_electrica:.2f} kWh"
-        )
-        r.append(
-            f"Tiempo total de espera acumulado: {modelo.formato_hora(estacion.tiempo_espera_total)}"
-        )
-        r.append(
-            f"Costo total de operaci\u00f3n (el\u00e9ctrico): S/. {estacion.costo_total_electrico:.2f}"
-        )
-        r.append(
-            f"Costo total de operaci\u00f3n (gas natural): S/. {estacion.costo_total_gas:.2f}"
-        )
-
-        if estacion.costo_total_electrico < estacion.costo_total_gas:
-            r.append("Es m\u00e1s barato operar con electricidad.")
-        else:
-            r.append("Es m\u00e1s barato operar con gas natural.")
-
-        emis_elec = estacion.energia_total_cargada * modelo.param_economicos.factor_co2_elec
-        emis_gas = estacion.energia_total_gas * modelo.param_economicos.factor_co2_gas
-        ahorro = emis_gas - emis_elec
-        r.append(f"Emisiones con electricidad: {emis_elec:.2f} kg CO2")
-        r.append(f"Emisiones con gas natural: {emis_gas:.2f} kg CO2")
-        r.append(f"Ahorro de CO2: {ahorro:.2f} kg")
+        r = modelo.formatear_resultados(estacion)
 
         self.finished.emit(r)
 
