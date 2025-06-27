@@ -2,10 +2,13 @@
 
 Este repositorio contiene utilidades para simulación.
 
+d1xt4j-codex/cambiar-frecuencia-de-salida-de-los-buses
 Las simulaciones por defecto abarcan 21 días de operación. Internamente esa
 duración se convierte a horas cuando es necesario, pero la entrada y las
 métricas se expresan en días para mayor claridad. Por defecto se consideran
 hasta 20 autobuses en la estación.
+
+main
 La estación cuenta con 21 cargadores y 41 baterías (33 de ellas cargadas al
 inicio).
 Durante los fines de semana la demanda de autobuses se reduce a la mitad,
