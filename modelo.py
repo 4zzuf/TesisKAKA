@@ -1,6 +1,8 @@
 import simpy
 import random
 
+import trafico
+
 from parametros import (
     ParametrosBateria,
     ParametrosEstacion,
@@ -30,12 +32,13 @@ def es_fin_de_semana(tiempo):
     return dia_semana >= 5
 
 def calcular_soc_inicial(hora_actual):
-    """Calcula el SoC inicial basado en la hora actual."""
-    if 7 <= hora_actual < 9 or 18 <= hora_actual < 20:  # Hora punta de autobuses
-        soc_inicial = random.uniform(10, 20)  # SoC entre 10% y 20%
-    else:  # Fuera de hora punta de autobuses
-        soc_inicial = random.uniform(30, 40)  # SoC entre 30% y 40%
-    return soc_inicial
+    """Calcula el SoC inicial considerando el tráfico."""
+    factor = trafico.factor_trafico(hora_actual)
+    if factor >= 1.3:
+        return random.uniform(10, 20)  # Tráfico muy congestionado
+    if factor >= 1.1:
+        return random.uniform(20, 30)  # Tráfico moderado
+    return random.uniform(30, 40)  # Tráfico ligero
 
 
 class EstacionIntercambio:
@@ -143,7 +146,7 @@ class EstacionIntercambio:
             capacidad_carga = (
                 (param_bateria.soc_objetivo - soc_actual) / 100
             ) * param_bateria.capacidad
-            tiempo_carga = capacidad_carga / param_bateria.potencia_carga
+            tiempo_carga = param_bateria.tiempo_carga(soc_actual)
 
             if param_economicos.horas_punta[0] <= hora_actual < param_economicos.horas_punta[1]:
                 costo_carga = capacidad_carga * param_economicos.costo_punta
@@ -221,13 +224,15 @@ def proceso_autobus(env, estacion, autobuses_id, soc_inicial, tiempo_ruta):
 
         # El autobús sale a su ruta y regresa con la batería descargada
         duracion_ruta = tiempo_ruta * 2 if es_fin_de_semana(env.now) else tiempo_ruta
+        hora_inicio_ruta = int(env.now % 24)
+        factor = trafico.factor_trafico(hora_inicio_ruta)
         yield env.timeout(duracion_ruta)
-        # Consumo de gas equivalente durante la ruta
-        energia_gas = param_operacion.consumo_gas_hora * duracion_ruta
+        # Consumo de gas equivalente durante la ruta ajustado por el tráfico
+        energia_gas = param_operacion.consumo_gas_hora * duracion_ruta * factor
         estacion.energia_total_gas += energia_gas
         estacion.costo_total_gas += energia_gas * param_economicos.costo_gas_kwh
-        soc_inicial = random.uniform(30, 40)
         hora_actual = int(env.now % 24)
+        soc_inicial = calcular_soc_inicial(hora_actual)
         if VERBOSE:
             print(
                 f"Autobús {autobuses_id} regresa a la estación en {formato_hora(env.now)} "
