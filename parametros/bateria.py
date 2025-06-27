@@ -18,16 +18,14 @@ class ParametrosBateria:
 
     def potencia_carga(self, soc):
         """Devuelve la potencia de carga en kW para el SoC dado."""
-        soc = max(0, min(soc, 100))
-        if soc < 20:
-            # De 50 a 150 kW
-            return 50 + (soc / 20) * 100
-        if soc < 55:
-            # De 150 a 140 kW
-            return 150 - (soc - 20) * (10 / 35)
-        if soc < 80:
-            # De 140 a 50 kW
-            return 140 - (soc - 55) * (90 / 25)
+        soc = max(0.0, min(float(soc), 100.0))
+        if soc <= 80:
+            # Curva suavizada mediante un polinomio cúbico que pasa por los
+            # puntos (0,50), (20,150), (55,140) y (80,50)
+            a = 5.108225108225208e-04
+            b = -0.1344155844155851
+            c = 7.483982683982695
+            return a * soc ** 3 + b * soc ** 2 + c * soc + 50
         return 50
 
     def tiempo_carga(self, soc_inicial, soc_objetivo=None):

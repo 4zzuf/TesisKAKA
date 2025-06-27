@@ -41,3 +41,27 @@ def factor_trafico(hora, factores=FACTORES_LIMA):
     """Devuelve el factor de tráfico para la hora indicada (0-23)."""
     hora_int = int(hora) % 24
     return factores.get(hora_int, 1.0)
+
+
+def graficar_trafico(factores=FACTORES_LIMA):
+    """Muestra un gráfico con la evolución diaria del tráfico."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception as exc:  # pragma: no cover - solo para uso manual
+        raise RuntimeError("matplotlib requerido para graficar") from exc
+
+    horas = list(range(24))
+    valores = [factores.get(h, 1.0) for h in horas]
+
+    plt.figure(figsize=(8, 4))
+    plt.plot(horas, valores, marker="o")
+    plt.xlabel("Hora del día")
+    plt.ylabel("Factor de tráfico")
+    plt.title("Perfil de tráfico para Lima")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == "__main__":  # pragma: no cover
+    graficar_trafico()
