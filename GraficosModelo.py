@@ -230,6 +230,8 @@ def grafico_emisiones(block: bool = True):
     plt.bar(etiquetas, valores, color=["tab:blue", "tab:orange", "tab:green"])
     plt.ylabel("Toneladas de CO2")
     plt.title("Emisiones de CO2 durante la simulación")
+
+    
     plt.tight_layout()
     plt.show(block=block)
 
@@ -340,6 +342,7 @@ def grafico_uso_cargadores(block: bool = True):
     plt.ylabel("Uso de cargadores (%)")
     plt.title("Utilización de cargadores")
     plt.grid(True)
+
     plt.tight_layout()
     plt.show(block=block)
 
