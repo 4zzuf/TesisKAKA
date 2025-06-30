@@ -130,6 +130,8 @@ class SimulacionWindow(QtWidgets.QWidget):
             "Emisiones",
             "Tráfico",
             "Intercambio",
+            "Espera baterías",
+
         ])
         self.boton_grafico = QtWidgets.QPushButton("Mostrar gr\u00e1fico")
         self.boton_grafico.clicked.connect(self.mostrar_grafico)
@@ -170,6 +172,9 @@ class SimulacionWindow(QtWidgets.QWidget):
             trafico.graficar_trafico(block=False)
         elif opcion == "Intercambio":
             tiempos_intercambio.graficar_tiempos_intercambio(block=False)
+        elif opcion == "Espera baterías":
+            tiempos_intercambio.graficar_espera_baterias(block=False)
+
 
     def run_simulation(self):
         self._update_params()

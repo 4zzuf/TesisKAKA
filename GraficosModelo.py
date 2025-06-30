@@ -1,5 +1,4 @@
 import argparse
-import matplotlib.pyplot as plt
 import modelo
 from modelo import (
     param_simulacion,
@@ -9,14 +8,24 @@ from modelo import (
 )
 from parametros import ParametrosBateria
 
+ESTILO_MEJOR = "seaborn-v0_8"
+
 TIEMPO_REEMPLAZO = 4 / 60  # Tiempo de intercambio de la batería en horas
 
 
 def grafico_carga_bateria(block: bool = True):
     """Grafica la curva de potencia de carga según el SoC."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
+
     bateria = ParametrosBateria()
     soc_vals = list(range(0, 91))
     potencias = [bateria.potencia_carga(s) for s in soc_vals]
+
+    plt.style.use(ESTILO_MEJOR)
 
     plt.figure(figsize=(8, 4))
     plt.plot(soc_vals, potencias, marker="o")
@@ -63,10 +72,18 @@ def costo_gas_teorico(numero_autobuses, tiempo_ruta=4):
 
 def grafico_costos(block: bool = True):
     """Genera los gráficos de costos y consumo eléctrico."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
+
     max_autos = param_simulacion.max_autobuses
     valores = list(range(1, max_autos + 1))
     resultados = [_costos_para_autobuses(n) for n in valores]
     costos_elec, costos_gas, energias_punta, energias_fuera = zip(*resultados)
+
+    plt.style.use(ESTILO_MEJOR)
 
     plt.figure(figsize=(8, 4))
     plt.plot(valores, costos_elec, marker="o")
@@ -81,6 +98,8 @@ def grafico_costos(block: bool = True):
     modelo.VERBOSE = False
     estacion = modelo.ejecutar_simulacion()
     modelo.VERBOSE = anterior
+
+    plt.style.use(ESTILO_MEJOR)
     costo_e_hora = estacion.costo_total_electrico / param_simulacion.duracion
     costo_g_hora = estacion.costo_total_gas / param_simulacion.duracion
 
@@ -118,10 +137,17 @@ def grafico_costos(block: bool = True):
 
 def grafico_diarios(block: bool = True):
     """Grafica intercambios y consumo diarios."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
     anterior = modelo.VERBOSE
     modelo.VERBOSE = False
     estacion = modelo.ejecutar_simulacion()
     modelo.VERBOSE = anterior
+
+    plt.style.use(ESTILO_MEJOR)
 
     dias = param_simulacion.dias
     intercambios = [0] * (dias + 1)
@@ -152,6 +178,11 @@ def grafico_diarios(block: bool = True):
 
 def grafico_emisiones(block: bool = True):
     """Muestra un gráfico comparando emisiones y el ahorro total de CO2."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
     anterior = modelo.VERBOSE
     modelo.VERBOSE = False
     estacion = modelo.ejecutar_simulacion()

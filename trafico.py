@@ -36,6 +36,8 @@ FACTORES_LIMA = {
     23: 0.7,
 }
 
+ESTILO_MEJOR = "seaborn-v0_8"
+
 
 def factor_trafico(hora, factores=FACTORES_LIMA):
     """Devuelve el factor de tráfico para la hora indicada (0-23)."""
@@ -55,8 +57,10 @@ def graficar_trafico(factores=FACTORES_LIMA, block=True):
     """
     try:
         import matplotlib.pyplot as plt
-    except Exception as exc:  # pragma: no cover - solo para uso manual
-        raise RuntimeError("matplotlib requerido para graficar") from exc
+        plt.style.use(ESTILO_MEJOR)
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
 
     horas = list(range(24))
     valores = [factores.get(h, 1.0) for h in horas]
