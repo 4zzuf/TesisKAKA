@@ -2,7 +2,10 @@ import sys
 import random
 
 from PyQt5 import QtWidgets, QtCore
+
 import GraficosModelo
+
+
 import simpy
 import modelo
 
@@ -116,6 +119,7 @@ class SimulacionWindow(QtWidgets.QWidget):
         self.cancelar.setEnabled(False)
         self.cancelar.clicked.connect(self.cancelar_simulacion)
 
+
         self.combo_grafico = QtWidgets.QComboBox()
         self.combo_grafico.addItems(["Carga", "Costos", "Diarios", "Emisiones"])
         self.boton_grafico = QtWidgets.QPushButton("Mostrar gr\u00e1fico")
@@ -124,6 +128,7 @@ class SimulacionWindow(QtWidgets.QWidget):
         layout.addRow(self.boton)
         layout.addRow(self.cancelar)
         layout.addRow(self.combo_grafico, self.boton_grafico)
+
         layout.addRow(self.progreso)
         layout.addRow(self.resultados)
 
