@@ -201,8 +201,10 @@ class SimulacionWindow(QtWidgets.QWidget):
         # sin cerrar la ventana.
         self.mostrar_grafico()
 
+
         # Asegurar que la ventana principal permanezca visible.
         self.show()
+
 
 
 def main():
