@@ -2,6 +2,10 @@ import sys
 import random
 
 from PyQt5 import QtWidgets, QtCore
+
+import GraficosModelo
+
+
 import simpy
 import modelo
 
@@ -79,10 +83,6 @@ class SimulacionWindow(QtWidgets.QWidget):
         self.autobuses.setValue(modelo.param_simulacion.max_autobuses)
         layout.addRow("Max autobuses", self.autobuses)
 
-        self.semilla = QtWidgets.QSpinBox()
-        self.semilla.setRange(0, 9999)
-        self.semilla.setValue(modelo.param_simulacion.semilla)
-        layout.addRow("Semilla", self.semilla)
 
         self.capacidad = QtWidgets.QSpinBox()
         self.capacidad.setRange(1, 200)
@@ -119,25 +119,47 @@ class SimulacionWindow(QtWidgets.QWidget):
         self.cancelar.setEnabled(False)
         self.cancelar.clicked.connect(self.cancelar_simulacion)
 
+
+        self.combo_grafico = QtWidgets.QComboBox()
+        self.combo_grafico.addItems(["Carga", "Costos", "Diarios", "Emisiones"])
+        self.boton_grafico = QtWidgets.QPushButton("Mostrar gr\u00e1fico")
+        self.boton_grafico.clicked.connect(self.mostrar_grafico)
+
         layout.addRow(self.boton)
         layout.addRow(self.cancelar)
+        layout.addRow(self.combo_grafico, self.boton_grafico)
+
         layout.addRow(self.progreso)
         layout.addRow(self.resultados)
 
         self.setLayout(layout)
         self.setWindowTitle("Simulaci\u00f3n de intercambio de bater\u00edas")
 
-    def run_simulation(self):
+    def _update_params(self):
         modelo.param_simulacion.actualizar(
             dias=self.dias.value(),
             max_autobuses=self.autobuses.value(),
-            semilla=self.semilla.value(),
         )
         modelo.param_estacion.actualizar(
             capacidad=self.capacidad.value(),
             total=self.total_baterias.value(),
             iniciales=self.baterias_iniciales.value(),
         )
+
+    def mostrar_grafico(self):
+        self._update_params()
+        opcion = self.combo_grafico.currentText()
+        if opcion == "Carga":
+            GraficosModelo.grafico_carga_bateria()
+        elif opcion == "Costos":
+            GraficosModelo.grafico_costos()
+        elif opcion == "Diarios":
+            GraficosModelo.grafico_diarios()
+        elif opcion == "Emisiones":
+            GraficosModelo.grafico_emisiones()
+
+    def run_simulation(self):
+        self._update_params()
 
         self.boton.setEnabled(False)
         self.cancelar.setEnabled(True)
