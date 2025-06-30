@@ -177,8 +177,14 @@ class SimulacionWindow(QtWidgets.QWidget):
         self._worker.finished.connect(self._on_simulation_finished)
         self._worker.progress.connect(self.progreso.setValue)
         self._worker.finished.connect(self._thread.quit)
-        self._thread.finished.connect(self._thread.deleteLater)
+        self._thread.finished.connect(self._on_thread_finished)
         self._thread.start()
+
+    def _on_thread_finished(self):
+        """Clean up the worker thread once it has fully stopped."""
+        if self._thread is not None:
+            self._thread.deleteLater()
+            self._thread = None
 
     def cancelar_simulacion(self):
         if self._worker is not None:
@@ -193,7 +199,6 @@ class SimulacionWindow(QtWidgets.QWidget):
         self.progreso.setValue(100)
         self._worker.deleteLater()
         self._worker = None
-        self._thread = None
 
         # Mostrar automáticamente el gráfico seleccionado una vez
         # finalizada la simulación. De esta manera los parámetros
@@ -207,13 +212,18 @@ class SimulacionWindow(QtWidgets.QWidget):
 
 
 
+_window = None
+
+
 def main():
+    """Run the GUI keeping a reference to the main window."""
+    global _window
     app = QtWidgets.QApplication(sys.argv)
-    win = SimulacionWindow()
-    win.show()
-    # Ejecutar la aplicación sin finalizar el proceso principal
-    app.exec_()
+    _window = SimulacionWindow()
+    _window.show()
+    # Ejecutar la aplicación y mantenerla abierta hasta que el usuario la cierre
+    return app.exec_()
 
 
 if __name__ == "__main__":  # pragma: no cover - ejecuci\u00f3n manual
-    main()
+    sys.exit(main())
