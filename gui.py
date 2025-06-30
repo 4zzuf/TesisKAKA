@@ -207,10 +207,15 @@ class SimulacionWindow(QtWidgets.QWidget):
 
 
 
+_window = None
+
+
 def main():
+    """Run the GUI keeping a reference to the main window."""
+    global _window
     app = QtWidgets.QApplication(sys.argv)
-    win = SimulacionWindow()
-    win.show()
+    _window = SimulacionWindow()
+    _window.show()
     # Ejecutar la aplicación y mantenerla abierta hasta que el usuario la cierre
     return app.exec_()
 
