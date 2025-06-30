@@ -211,9 +211,9 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     win = SimulacionWindow()
     win.show()
-    # Ejecutar la aplicación sin finalizar el proceso principal
-    app.exec_()
+    # Ejecutar la aplicación y mantenerla abierta hasta que el usuario la cierre
+    return app.exec_()
 
 
 if __name__ == "__main__":  # pragma: no cover - ejecuci\u00f3n manual
-    main()
+    sys.exit(main())
