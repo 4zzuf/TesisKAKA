@@ -42,8 +42,17 @@ def factor_trafico(hora, factores=FACTORES_LIMA):
     hora_int = int(hora) % 24
     return factores.get(hora_int, 1.0)
 
-def graficar_trafico(factores=FACTORES_LIMA):
-    """Muestra un gráfico con la evolución diaria del tráfico."""
+def graficar_trafico(factores=FACTORES_LIMA, block=True):
+    """Muestra un gráfico con la evolución diaria del tráfico.
+
+    Parameters
+    ----------
+    factores : dict, optional
+        Mapeo hora-factor de tráfico a graficar.
+    block : bool, optional
+        Si ``True`` la ventana del gráfico es bloqueante.  Se pasa como
+        argumento desde la interfaz para evitar congelar la aplicación.
+    """
     try:
         import matplotlib.pyplot as plt
     except Exception as exc:  # pragma: no cover - solo para uso manual
@@ -59,7 +68,7 @@ def graficar_trafico(factores=FACTORES_LIMA):
     plt.title("Perfil de tráfico para Lima")
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
 
 if __name__ == "__main__":  # pragma: no cover

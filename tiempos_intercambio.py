@@ -18,10 +18,17 @@ def tiempo_promedio_para_autobuses(numero_autobuses):
     )
     return (tiempo_total / estacion.intercambios_realizados) * 60
 
-def main():
-    # Importar matplotlib solo cuando se ejecuta directamente para
-    # evitar dependencias innecesarias al utilizar este módulo desde
-    # otros scripts o durante las pruebas.
+def graficar_tiempos_intercambio(block=True):
+    """Grafica el tiempo promedio de intercambio por número de autobuses.
+
+    Parameters
+    ----------
+    block : bool, optional
+        Indica si ``plt.show`` debe ser bloqueante. La interfaz pasa
+        ``False`` para no congelar la ventana principal.
+    """
+    # Importar matplotlib solo cuando se ejecuta directamente para evitar
+    # dependencias innecesarias al utilizar este módulo durante las pruebas.
     import matplotlib.pyplot as plt
 
     max_autos = param_simulacion.max_autobuses
@@ -29,13 +36,17 @@ def main():
     tiempos = [tiempo_promedio_para_autobuses(n) for n in valores]
 
     plt.figure(figsize=(8, 4))
-    plt.plot(valores, tiempos, marker='o')
-    plt.xlabel('Número de autobuses')
-    plt.ylabel('Tiempo promedio de intercambio (minutos)')
-    plt.title('Tiempo promedio de intercambio por número de autobuses')
+    plt.plot(valores, tiempos, marker="o")
+    plt.xlabel("Número de autobuses")
+    plt.ylabel("Tiempo promedio de intercambio (minutos)")
+    plt.title("Tiempo promedio de intercambio por número de autobuses")
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
+
+
+def main():
+    graficar_tiempos_intercambio()
 
 if __name__ == '__main__':
     main()
