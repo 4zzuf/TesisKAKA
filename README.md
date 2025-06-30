@@ -81,9 +81,9 @@ python GraficosModelo.py costos
 
 ## Ahorro de emisiones
 
-Ejecuta `GraficosModelo.py emisiones` para comparar las emisiones mensuales con
-electricidad y gas natural. El gráfico incluye las emisiones de cada tecnología
-y una barra adicional con el ahorro total de CO₂:
+Ejecuta `GraficosModelo.py emisiones` para comparar las emisiones totales del
+período con electricidad y gas natural. El gráfico incluye las emisiones de
+cada tecnología y una barra adicional con el ahorro total de CO₂:
 
 ```bash
 python GraficosModelo.py emisiones
@@ -91,12 +91,18 @@ python GraficosModelo.py emisiones
 
 ## Otros gráficos
 
-El módulo `GraficosModelo.py` con la opción `diarios` muestra la evolución diaria de los
-intercambios de batería y del consumo de energía durante el periodo
-simulado:
+El módulo `GraficosModelo.py` incluye varias visualizaciones adicionales:
+
+- `diarios`: intercambios y consumo de energía por día.
+- `inventario`: baterías cargadas y descargadas disponibles cada hora.
+- `cola`: minutos de espera acumulados cada hora.
+- `costosdia`: costo eléctrico diario diferenciando laborables y fines de semana.
+- `cargadores`: porcentaje de utilización de los cargadores a lo largo del tiempo.
+
+Por ejemplo, para mostrar el inventario de baterías ejecuta:
 
 ```bash
-python GraficosModelo.py diarios
+python GraficosModelo.py inventario
 ```
 
 ## Simulación desde la línea de comandos
