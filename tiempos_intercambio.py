@@ -31,12 +31,14 @@ def graficar_tiempos_intercambio(block=True):
     """
     # Importar matplotlib solo cuando se ejecuta directamente para evitar
     # dependencias innecesarias al utilizar este módulo durante las pruebas.
+
     try:
         import matplotlib.pyplot as plt
     except Exception:
         print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
         return
     plt.style.use(ESTILO_MEJOR)
+
 
     max_autos = param_simulacion.max_autobuses
     valores = list(range(1, max_autos + 1))
@@ -47,6 +49,7 @@ def graficar_tiempos_intercambio(block=True):
     plt.xlabel("Número de autobuses")
     plt.ylabel("Tiempo promedio de intercambio (minutos)")
     plt.title("Tiempo promedio de intercambio por número de autobuses")
+
     plt.grid(True)
     plt.tight_layout()
     plt.show(block=block)
@@ -81,6 +84,7 @@ def graficar_espera_baterias(block=True):
     plt.xlabel("Número de autobuses")
     plt.ylabel("Tiempo en reserva (minutos)")
     plt.title("Espera promedio de baterías cargadas")
+
     plt.grid(True)
     plt.tight_layout()
     plt.show(block=block)
