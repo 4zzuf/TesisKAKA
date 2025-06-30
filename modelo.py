@@ -255,6 +255,7 @@ def ejecutar_simulacion(
     max_autobuses=param_simulacion.max_autobuses,
     duracion=param_simulacion.duracion,
     tiempo_ruta=4,
+    procesos_extra=None,
 ):
     """Ejecuta la simulación y devuelve la estación resultante.
 
@@ -273,6 +274,9 @@ def ejecutar_simulacion(
             tiempo_ruta=tiempo_ruta,
         )
     )
+    if procesos_extra:
+        for proc in procesos_extra:
+            env.process(proc(env, estacion))
     env.run(until=duracion)
     return estacion
 

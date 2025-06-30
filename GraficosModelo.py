@@ -13,6 +13,30 @@ ESTILO_MEJOR = "seaborn-v0_8"
 TIEMPO_REEMPLAZO = 4 / 60  # Tiempo de intercambio de la batería en horas
 
 
+def _simular_con_registro():
+    """Ejecuta la simulación registrando datos horarios."""
+    datos = {
+        "cargadas": [],
+        "descargadas": [],
+        "cargando": [],
+        "espera": [],
+    }
+
+    def registrar(env, estacion):
+        for _ in range(int(param_simulacion.duracion) + 1):
+            datos["cargadas"].append(len(estacion.baterias_reserva.items))
+            datos["descargadas"].append(len(estacion.baterias_descargadas.items))
+            datos["cargando"].append(estacion.baterias_cargando)
+            datos["espera"].append(estacion.tiempo_espera_total)
+            yield env.timeout(1)
+
+    anterior = modelo.VERBOSE
+    modelo.VERBOSE = False
+    estacion = modelo.ejecutar_simulacion(procesos_extra=[registrar])
+    modelo.VERBOSE = anterior
+    return estacion, datos
+
+
 def grafico_carga_bateria(block: bool = True):
     """Grafica la curva de potencia de carga según el SoC."""
     try:
@@ -188,12 +212,15 @@ def grafico_emisiones(block: bool = True):
     estacion = modelo.ejecutar_simulacion()
     modelo.VERBOSE = anterior
 
-    factor = 720 / param_simulacion.duracion
     emis_elec = (
-        estacion.energia_total_cargada * param_economicos.factor_co2_elec * factor / 1000
+        estacion.energia_total_cargada
+        * param_economicos.factor_co2_elec
+        / 1000
     )
     emis_gas = (
-        estacion.energia_total_gas * param_economicos.factor_co2_gas * factor / 1000
+        estacion.energia_total_gas
+        * param_economicos.factor_co2_gas
+        / 1000
     )
     ahorro = emis_gas - emis_elec
 
@@ -201,8 +228,118 @@ def grafico_emisiones(block: bool = True):
     etiquetas = ["Electricidad", "Gas natural", "Ahorro de CO2"]
     valores = [emis_elec, emis_gas, ahorro]
     plt.bar(etiquetas, valores, color=["tab:blue", "tab:orange", "tab:green"])
-    plt.ylabel("Toneladas de CO2 por mes")
-    plt.title("Comparación de emisiones mensuales")
+    plt.ylabel("Toneladas de CO2")
+    plt.title("Emisiones de CO2 durante la simulación")
+    plt.tight_layout()
+    plt.show(block=block)
+
+
+def grafico_inventario(block: bool = True):
+    """Muestra el inventario de baterías a lo largo del tiempo."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
+    _, datos = _simular_con_registro()
+    horas = range(len(datos["cargadas"]))
+
+    plt.style.use(ESTILO_MEJOR)
+    plt.figure(figsize=(8, 4))
+    plt.plot(horas, datos["cargadas"], label="Cargadas")
+    plt.plot(horas, datos["descargadas"], label="Descargadas")
+    plt.xlabel("Hora de simulación")
+    plt.ylabel("Número de baterías")
+    plt.title("Inventario de baterías")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show(block=block)
+
+
+def grafico_cola(block: bool = True):
+    """Grafica la evolución de la cola de autobuses."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
+    _, datos = _simular_con_registro()
+    espera = datos["espera"]
+    espera_h = [0.0]
+    for i in range(1, len(espera)):
+        espera_h.append((espera[i] - espera[i - 1]) * 60)
+    horas = range(len(espera_h))
+
+    plt.style.use(ESTILO_MEJOR)
+    plt.figure(figsize=(8, 4))
+    plt.plot(horas, espera_h, marker="o")
+    plt.xlabel("Hora de simulación")
+    plt.ylabel("Minutos de espera nuevos")
+    plt.title("Evolución de la cola de autobuses")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show(block=block)
+
+
+def grafico_costos_dia(block: bool = True):
+    """Grafica el costo eléctrico por día de operación."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
+    anterior = modelo.VERBOSE
+    modelo.VERBOSE = False
+    estacion = modelo.ejecutar_simulacion()
+    modelo.VERBOSE = anterior
+
+    dias = param_simulacion.dias
+    costos = [0.0] * dias
+    for dia, hora_str, energia in estacion.registro_intercambios:
+        if dia < dias:
+            hora = int(hora_str.split()[2].split(":" )[0])
+            if param_economicos.horas_punta[0] <= hora < param_economicos.horas_punta[1]:
+                costo = energia * param_economicos.costo_punta
+            else:
+                costo = energia * param_economicos.costo_normal
+            costos[dia] += costo
+
+    colores = [
+        "tab:orange" if modelo.es_fin_de_semana(d * 24) else "tab:blue"
+        for d in range(dias)
+    ]
+
+    plt.style.use(ESTILO_MEJOR)
+    plt.figure(figsize=(8, 4))
+    plt.bar(range(dias), costos, color=colores)
+    plt.xlabel("Día de operación")
+    plt.ylabel("Costo diario (S/.)")
+    plt.title("Costo eléctrico por día")
+    plt.tight_layout()
+    plt.show(block=block)
+
+
+def grafico_uso_cargadores(block: bool = True):
+    """Muestra la utilización porcentual de los cargadores."""
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        print("Falta matplotlib. Ejecuta 'pip install -r requirements.txt'")
+        return
+    _, datos = _simular_con_registro()
+    horas = range(len(datos["cargando"]))
+    uso = [
+        c / param_estacion.capacidad_estacion * 100 for c in datos["cargando"]
+    ]
+
+    plt.style.use(ESTILO_MEJOR)
+    plt.figure(figsize=(8, 4))
+    plt.plot(horas, uso, marker="o")
+    plt.xlabel("Hora de simulación")
+    plt.ylabel("Uso de cargadores (%)")
+    plt.title("Utilización de cargadores")
+    plt.grid(True)
     plt.tight_layout()
     plt.show(block=block)
 
@@ -213,7 +350,16 @@ def main():
     )
     parser.add_argument(
         "grafico",
-        choices=["carga", "costos", "diarios", "emisiones"],
+        choices=[
+            "carga",
+            "costos",
+            "diarios",
+            "emisiones",
+            "inventario",
+            "cola",
+            "costosdia",
+            "cargadores",
+        ],
         help="Tipo de gráfico a mostrar",
     )
     args = parser.parse_args()
@@ -226,6 +372,14 @@ def main():
         grafico_diarios()
     elif args.grafico == "emisiones":
         grafico_emisiones()
+    elif args.grafico == "inventario":
+        grafico_inventario()
+    elif args.grafico == "cola":
+        grafico_cola()
+    elif args.grafico == "costosdia":
+        grafico_costos_dia()
+    elif args.grafico == "cargadores":
+        grafico_uso_cargadores()
 
 
 if __name__ == "__main__":  # pragma: no cover - ejecución manual

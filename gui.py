@@ -128,6 +128,10 @@ class SimulacionWindow(QtWidgets.QWidget):
             "Costos",
             "Diarios",
             "Emisiones",
+            "Inventario",
+            "Cola",
+            "Costos día",
+            "Cargadores",
             "Tráfico",
             "Intercambio",
             "Espera baterías",
@@ -168,6 +172,14 @@ class SimulacionWindow(QtWidgets.QWidget):
             GraficosModelo.grafico_diarios(block=False)
         elif opcion == "Emisiones":
             GraficosModelo.grafico_emisiones(block=False)
+        elif opcion == "Inventario":
+            GraficosModelo.grafico_inventario(block=False)
+        elif opcion == "Cola":
+            GraficosModelo.grafico_cola(block=False)
+        elif opcion == "Costos día":
+            GraficosModelo.grafico_costos_dia(block=False)
+        elif opcion == "Cargadores":
+            GraficosModelo.grafico_uso_cargadores(block=False)
         elif opcion == "Tráfico":
             trafico.graficar_trafico(block=False)
         elif opcion == "Intercambio":
