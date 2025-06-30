@@ -69,6 +69,10 @@ class EstacionIntercambio:
         # Inicializar los inventarios.
         self.baterias_reserva.items = [100 for _ in range(param_estacion.baterias_iniciales)]
         self.baterias_descargadas.items = [30 for _ in range(param_estacion.total_baterias - param_estacion.baterias_iniciales)]
+        # Registrar el momento en que cada batería entra en reserva para medir el
+        # tiempo que permanece en espera hasta ser utilizada.
+        self._ingreso_reserva = [0.0 for _ in range(param_estacion.baterias_iniciales)]
+        self.tiempos_espera_baterias = []
         self.baterias_cargando = 0  # Cantidad de baterías actualmente en carga
         self.tiempo_espera_total = 0  # Tiempo total de espera acumulado
         self.energia_total_cargada = 0  # Energía total consumida para cargar baterías
@@ -107,6 +111,8 @@ class EstacionIntercambio:
         # ``soc_inicial`` corresponde al nivel de carga de la batería usada
         # cuando el autobús llega a la estación.
         _ = yield self.baterias_reserva.get()
+        ingreso = self._ingreso_reserva.pop(0)
+        self.tiempos_espera_baterias.append(self.env.now - ingreso)
         yield self.baterias_descargadas.put(soc_inicial)
         capacidad_requerida = (param_bateria.soc_objetivo - soc_inicial) / 100 * param_bateria.capacidad
         tiempo_reemplazo = 4 / 60  # 4 minutos en horas
@@ -168,6 +174,7 @@ class EstacionIntercambio:
 
             self.baterias_cargando -= 1
             yield self.baterias_reserva.put(param_bateria.soc_objetivo)
+            self._ingreso_reserva.append(self.env.now)
             self.energia_total_cargada += capacidad_carga
             self.costo_total_electrico += costo_carga
 

@@ -4,6 +4,8 @@ import random
 from PyQt5 import QtWidgets, QtCore
 
 import GraficosModelo
+import trafico
+import tiempos_intercambio
 
 
 import simpy
@@ -121,7 +123,15 @@ class SimulacionWindow(QtWidgets.QWidget):
 
 
         self.combo_grafico = QtWidgets.QComboBox()
-        self.combo_grafico.addItems(["Carga", "Costos", "Diarios", "Emisiones"])
+        self.combo_grafico.addItems([
+            "Carga",
+            "Costos",
+            "Diarios",
+            "Emisiones",
+            "Tráfico",
+            "Intercambio",
+            "Espera baterías",
+        ])
         self.boton_grafico = QtWidgets.QPushButton("Mostrar gr\u00e1fico")
         self.boton_grafico.clicked.connect(self.mostrar_grafico)
 
@@ -157,6 +167,12 @@ class SimulacionWindow(QtWidgets.QWidget):
             GraficosModelo.grafico_diarios(block=False)
         elif opcion == "Emisiones":
             GraficosModelo.grafico_emisiones(block=False)
+        elif opcion == "Tráfico":
+            trafico.graficar_trafico(block=False)
+        elif opcion == "Intercambio":
+            tiempos_intercambio.graficar_tiempos_intercambio(block=False)
+        elif opcion == "Espera baterías":
+            tiempos_intercambio.graficar_espera_baterias(block=False)
 
     def run_simulation(self):
         self._update_params()

@@ -38,6 +38,14 @@ python tiempos_intercambio.py
 Se abrirá una ventana con la gráfica que relaciona el número de autobuses con
 el tiempo promedio de cada intercambio.
 
+Además, el mismo módulo incluye una función para graficar cuánto tiempo
+permanecen las baterías cargadas en la estación antes de ser utilizadas. Para
+mostrarla ejecuta:
+
+```bash
+python -c "import tiempos_intercambio as t; t.graficar_espera_baterias()"
+```
+
 ## Gráficos de costos y consumos
 
 El módulo `GraficosModelo.py` genera varias gráficas:
