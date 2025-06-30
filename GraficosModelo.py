@@ -188,12 +188,15 @@ def grafico_emisiones(block: bool = True):
     estacion = modelo.ejecutar_simulacion()
     modelo.VERBOSE = anterior
 
-    factor = 720 / param_simulacion.duracion
     emis_elec = (
-        estacion.energia_total_cargada * param_economicos.factor_co2_elec * factor / 1000
+        estacion.energia_total_cargada
+        * param_economicos.factor_co2_elec
+        / 1000
     )
     emis_gas = (
-        estacion.energia_total_gas * param_economicos.factor_co2_gas * factor / 1000
+        estacion.energia_total_gas
+        * param_economicos.factor_co2_gas
+        / 1000
     )
     ahorro = emis_gas - emis_elec
 
@@ -201,8 +204,8 @@ def grafico_emisiones(block: bool = True):
     etiquetas = ["Electricidad", "Gas natural", "Ahorro de CO2"]
     valores = [emis_elec, emis_gas, ahorro]
     plt.bar(etiquetas, valores, color=["tab:blue", "tab:orange", "tab:green"])
-    plt.ylabel("Toneladas de CO2 por mes")
-    plt.title("Comparación de emisiones mensuales")
+    plt.ylabel("Toneladas de CO2")
+    plt.title("Emisiones de CO2 durante la simulación")
     plt.tight_layout()
     plt.show(block=block)
 

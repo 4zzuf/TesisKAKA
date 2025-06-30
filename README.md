@@ -81,9 +81,9 @@ python GraficosModelo.py costos
 
 ## Ahorro de emisiones
 
-Ejecuta `GraficosModelo.py emisiones` para comparar las emisiones mensuales con
-electricidad y gas natural. El gráfico incluye las emisiones de cada tecnología
-y una barra adicional con el ahorro total de CO₂:
+Ejecuta `GraficosModelo.py emisiones` para comparar las emisiones totales del
+período con electricidad y gas natural. El gráfico incluye las emisiones de
+cada tecnología y una barra adicional con el ahorro total de CO₂:
 
 ```bash
 python GraficosModelo.py emisiones
