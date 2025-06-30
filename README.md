@@ -99,9 +99,11 @@ El módulo `GraficosModelo.py` incluye varias visualizaciones adicionales:
 - `costosdia`: costo eléctrico diario diferenciando laborables y fines de semana.
 - `cargadores`: porcentaje de utilización de los cargadores a lo largo del tiempo.
 
+
 Estas mismas opciones están disponibles en la interfaz gráfica seleccionando el tipo de gráfico en el menú desplegable.
 
 Por ejemplo, para mostrar el inventario de baterías desde la terminal ejecuta:
+
 
 ```bash
 python GraficosModelo.py inventario
