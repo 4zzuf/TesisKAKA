@@ -193,6 +193,12 @@ class SimulacionWindow(QtWidgets.QWidget):
         self._worker = None
         self._thread = None
 
+        # Mostrar automáticamente el gráfico seleccionado una vez
+        # finalizada la simulación. De esta manera los parámetros
+        # ajustados por el usuario se reflejan en la visualización
+        # sin cerrar la ventana.
+        self.mostrar_grafico()
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
