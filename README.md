@@ -40,7 +40,7 @@ el tiempo promedio de cada intercambio.
 
 ## Gráficos de costos y consumos
 
-El script `graficos_costos.py` genera cuatro gráficos:
+El módulo `GraficosModelo.py` genera varias gráficas:
 
 1. Costo de operación con electricidad según el número de autobuses.
 2. Comparación de costos usando electricidad y gas natural.
@@ -54,7 +54,7 @@ Los valores se escalan a un mes de operación para evitar distorsiones cuando
 la simulación se ejecuta por 21 días.
 
 Para que los costos crezcan de forma continua al aumentar la flota,
-`graficos_costos.py` amplía temporalmente la capacidad de carga de la estación
+`GraficosModelo.py costos` amplía temporalmente la capacidad de carga de la estación
 según la cantidad de autobuses evaluada. De esta manera no se genera la caída de
 costos al pasar de cuatro a cinco vehículos ni la estabilización por encima de
 diez.
@@ -68,27 +68,27 @@ operación.
 Ejecuta:
 
 ```bash
-python graficos_costos.py
+python GraficosModelo.py costos
 ```
 
 ## Ahorro de emisiones
 
-Ejecuta `graficos_emisiones.py` para comparar las emisiones mensuales con
+Ejecuta `GraficosModelo.py emisiones` para comparar las emisiones mensuales con
 electricidad y gas natural. El gráfico incluye las emisiones de cada tecnología
 y una barra adicional con el ahorro total de CO₂:
 
 ```bash
-python graficos_emisiones.py
+python GraficosModelo.py emisiones
 ```
 
 ## Otros gráficos
 
-El script `graficos_diarios.py` muestra la evolución diaria de los
+El módulo `GraficosModelo.py` con la opción `diarios` muestra la evolución diaria de los
 intercambios de batería y del consumo de energía durante el periodo
 simulado:
 
 ```bash
-python graficos_diarios.py
+python GraficosModelo.py diarios
 ```
 
 ## Simulación desde la línea de comandos

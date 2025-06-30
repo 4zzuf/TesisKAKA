@@ -1,6 +1,11 @@
 import sys
+import random
 
 from PyQt5 import QtWidgets, QtCore
+import simpy
+
+# ``GraficosModelo`` se importa de forma perezosa en ``mostrar_grafico`` para
+# evitar fallos si ``matplotlib`` no está disponible al iniciar la GUI.
 import modelo
 
 
@@ -8,23 +13,50 @@ class SimulacionWorker(QtCore.QObject):
     """Ejecuta la simulación en un hilo separado."""
 
     finished = QtCore.pyqtSignal(list)
+    progress = QtCore.pyqtSignal(int)
 
     def __init__(self, max_autobuses, duracion, tiempo_ruta):
         super().__init__()
         self._max_autobuses = max_autobuses
         self._duracion = duracion
         self._tiempo_ruta = tiempo_ruta
+        self._cancel_requested = False
+
+    def cancel(self):
+        self._cancel_requested = True
 
     @QtCore.pyqtSlot()
     def run(self):
-        estacion = modelo.ejecutar_simulacion(
-            max_autobuses=self._max_autobuses,
-            duracion=self._duracion,
-            tiempo_ruta=self._tiempo_ruta,
+        # Ejecutar la simulación paso a paso para poder emitir progreso y
+        # permitir la cancelación segura desde la interfaz.
+        random.seed(modelo.param_simulacion.semilla)
+        env = simpy.Environment()
+        estacion = modelo.EstacionIntercambio(
+            env, modelo.param_estacion.capacidad_estacion
+        )
+        env.process(
+            modelo.llegada_autobuses(
+                env,
+                estacion,
+                max_autobuses=self._max_autobuses,
+                tiempo_ruta=self._tiempo_ruta,
+            )
         )
 
-        r = modelo.formatear_resultados(estacion)
+        last_percent = -1
+        while env.peek() <= self._duracion:
+            if self._cancel_requested:
+                break
+            env.step()
+            porcentaje = int(env.now / self._duracion * 100)
+            if porcentaje != last_percent:
+                self.progress.emit(porcentaje)
+                last_percent = porcentaje
 
+        if not self._cancel_requested and last_percent < 100:
+            self.progress.emit(100)
+
+        r = modelo.formatear_resultados(estacion)
         self.finished.emit(r)
 
 
@@ -50,10 +82,6 @@ class SimulacionWindow(QtWidgets.QWidget):
         self.autobuses.setValue(modelo.param_simulacion.max_autobuses)
         layout.addRow("Max autobuses", self.autobuses)
 
-        self.semilla = QtWidgets.QSpinBox()
-        self.semilla.setRange(0, 9999)
-        self.semilla.setValue(modelo.param_simulacion.semilla)
-        layout.addRow("Semilla", self.semilla)
 
         self.capacidad = QtWidgets.QSpinBox()
         self.capacidad.setRange(1, 200)
@@ -76,23 +104,38 @@ class SimulacionWindow(QtWidgets.QWidget):
         self.tiempo_ruta.setValue(4.0)
         layout.addRow("Tiempo ruta (h)", self.tiempo_ruta)
 
+        self.progreso = QtWidgets.QProgressBar()
+        self.progreso.setRange(0, 100)
+        self.progreso.setValue(0)
+
         self.resultados = QtWidgets.QTextEdit()
         self.resultados.setReadOnly(True)
 
         self.boton = QtWidgets.QPushButton("Ejecutar simulaci\u00f3n")
         self.boton.clicked.connect(self.run_simulation)
 
+        self.cancelar = QtWidgets.QPushButton("Cancelar")
+        self.cancelar.setEnabled(False)
+        self.cancelar.clicked.connect(self.cancelar_simulacion)
+
+        self.combo_grafico = QtWidgets.QComboBox()
+        self.combo_grafico.addItems(["Carga", "Costos", "Diarios", "Emisiones"])
+        self.boton_grafico = QtWidgets.QPushButton("Mostrar gr\u00e1fico")
+        self.boton_grafico.clicked.connect(self.mostrar_grafico)
+
         layout.addRow(self.boton)
+        layout.addRow(self.cancelar)
+        layout.addRow(self.combo_grafico, self.boton_grafico)
+        layout.addRow(self.progreso)
         layout.addRow(self.resultados)
 
         self.setLayout(layout)
         self.setWindowTitle("Simulaci\u00f3n de intercambio de bater\u00edas")
 
-    def run_simulation(self):
+    def _update_params(self):
         modelo.param_simulacion.actualizar(
             dias=self.dias.value(),
             max_autobuses=self.autobuses.value(),
-            semilla=self.semilla.value(),
         )
         modelo.param_estacion.actualizar(
             capacidad=self.capacidad.value(),
@@ -100,7 +143,29 @@ class SimulacionWindow(QtWidgets.QWidget):
             iniciales=self.baterias_iniciales.value(),
         )
 
+    def mostrar_grafico(self):
+        # Importar de manera diferida para evitar cargar ``matplotlib`` hasta que
+        # realmente se necesite. Esto previene cierres inesperados si no hay
+        # soporte gráfico disponible.
+        import GraficosModelo
+
+        self._update_params()
+        opcion = self.combo_grafico.currentText()
+        if opcion == "Carga":
+            GraficosModelo.grafico_carga_bateria()
+        elif opcion == "Costos":
+            GraficosModelo.grafico_costos()
+        elif opcion == "Diarios":
+            GraficosModelo.grafico_diarios()
+        elif opcion == "Emisiones":
+            GraficosModelo.grafico_emisiones()
+
+    def run_simulation(self):
+        self._update_params()
+
         self.boton.setEnabled(False)
+        self.cancelar.setEnabled(True)
+        self.progreso.setValue(0)
         self.resultados.clear()
 
         self._thread = QtCore.QThread()
@@ -112,13 +177,20 @@ class SimulacionWindow(QtWidgets.QWidget):
         self._worker.moveToThread(self._thread)
         self._thread.started.connect(self._worker.run)
         self._worker.finished.connect(self._on_simulation_finished)
+        self._worker.progress.connect(self.progreso.setValue)
         self._worker.finished.connect(self._thread.quit)
         self._thread.finished.connect(self._thread.deleteLater)
         self._thread.start()
 
+    def cancelar_simulacion(self):
+        if self._worker is not None:
+            self._worker.cancel()
+
     def _on_simulation_finished(self, lines):
         self.resultados.setPlainText("\n".join(lines))
         self.boton.setEnabled(True)
+        self.cancelar.setEnabled(False)
+        self.progreso.setValue(0)
         self._worker.deleteLater()
         self._worker = None
         self._thread = None
