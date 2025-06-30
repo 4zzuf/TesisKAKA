@@ -12,7 +12,7 @@ from parametros import ParametrosBateria
 TIEMPO_REEMPLAZO = 4 / 60  # Tiempo de intercambio de la batería en horas
 
 
-def grafico_carga_bateria():
+def grafico_carga_bateria(block: bool = True):
     """Grafica la curva de potencia de carga según el SoC."""
     bateria = ParametrosBateria()
     soc_vals = list(range(0, 91))
@@ -25,7 +25,7 @@ def grafico_carga_bateria():
     plt.title("Curva de carga de la batería")
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
 
 def _costos_para_autobuses(numero_autobuses, tiempo_ruta=4):
@@ -61,7 +61,7 @@ def costo_gas_teorico(numero_autobuses, tiempo_ruta=4):
     return energia_total * param_economicos.costo_gas_kwh
 
 
-def grafico_costos():
+def grafico_costos(block: bool = True):
     """Genera los gráficos de costos y consumo eléctrico."""
     max_autos = param_simulacion.max_autobuses
     valores = list(range(1, max_autos + 1))
@@ -75,7 +75,7 @@ def grafico_costos():
     plt.title("Costo de operación con electricidad")
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
     anterior = modelo.VERBOSE
     modelo.VERBOSE = False
@@ -91,7 +91,7 @@ def grafico_costos():
     plt.ylabel("Costo (S/./h)")
     plt.title("Costo promedio por hora de operación")
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
     plt.figure(figsize=(8, 4))
     plt.plot(valores, costos_elec, marker="o", label="Electricidad")
@@ -102,7 +102,7 @@ def grafico_costos():
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
     plt.figure(figsize=(8, 4))
     plt.plot(valores, energias_punta, marker="o", label="Hora punta")
@@ -113,10 +113,10 @@ def grafico_costos():
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
 
-def grafico_diarios():
+def grafico_diarios(block: bool = True):
     """Grafica intercambios y consumo diarios."""
     anterior = modelo.VERBOSE
     modelo.VERBOSE = False
@@ -138,7 +138,7 @@ def grafico_diarios():
     plt.title("Intercambios diarios")
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
     plt.figure(figsize=(8, 4))
     plt.plot(range(dias + 1), energia, marker="s", color="tab:orange")
@@ -147,10 +147,10 @@ def grafico_diarios():
     plt.title("Consumo diario de energía")
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
 
-def grafico_emisiones():
+def grafico_emisiones(block: bool = True):
     """Muestra un gráfico comparando emisiones y el ahorro total de CO2."""
     anterior = modelo.VERBOSE
     modelo.VERBOSE = False
@@ -173,7 +173,7 @@ def grafico_emisiones():
     plt.ylabel("Toneladas de CO2 por mes")
     plt.title("Comparación de emisiones mensuales")
     plt.tight_layout()
-    plt.show()
+    plt.show(block=block)
 
 
 def main():
