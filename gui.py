@@ -150,13 +150,13 @@ class SimulacionWindow(QtWidgets.QWidget):
         self._update_params()
         opcion = self.combo_grafico.currentText()
         if opcion == "Carga":
-            GraficosModelo.grafico_carga_bateria()
+            GraficosModelo.grafico_carga_bateria(block=False)
         elif opcion == "Costos":
-            GraficosModelo.grafico_costos()
+            GraficosModelo.grafico_costos(block=False)
         elif opcion == "Diarios":
-            GraficosModelo.grafico_diarios()
+            GraficosModelo.grafico_diarios(block=False)
         elif opcion == "Emisiones":
-            GraficosModelo.grafico_emisiones()
+            GraficosModelo.grafico_emisiones(block=False)
 
     def run_simulation(self):
         self._update_params()
