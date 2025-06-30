@@ -231,7 +231,6 @@ def grafico_emisiones(block: bool = True):
     plt.ylabel("Toneladas de CO2")
     plt.title("Emisiones de CO2 durante la simulación")
 
-    
     plt.tight_layout()
     plt.show(block=block)
 
