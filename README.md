@@ -24,6 +24,15 @@ Durante los fines de semana la demanda de autobuses se reduce a la mitad,
 por lo que cada ruta dura ocho horas en lugar de cuatro. Las horas de entrada
 y salida se registran en formato ``hh:mm``.
 
+La frecuencia de salida de autobuses ahora incluye variaciones
+aleatorias para reflejar la demanda real y posibles retrasos por
+congestión o incidentes. Durante las horas punta los intervalos
+promedio siguen siendo de seis minutos, mientras que el resto del día
+son de doce minutos, pero cada salida puede adelantarse o atrasarse
+unos minutos. Cada autobús toma una batería cargada de la reserva al
+iniciar su primer recorrido. Todos parten de la estación para cumplir
+su ruta y regresan más tarde para cambiar la batería.
+
 ## Gráfico de eficiencia operativa
 
 Ejecuta el script `tiempos_intercambio.py` para visualizar el tiempo de
