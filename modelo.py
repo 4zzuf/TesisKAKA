@@ -29,19 +29,26 @@ def formato_hora(horas_decimales):
     horas, minutos = divmod(horas_totales * 60, 60)
     return f"Día {dia:02} {int(horas):02}:{int(minutos):02}"
 
-def es_fin_de_semana(tiempo):
-    """Determina si la hora de simulación corresponde a fin de semana."""
-    dia_semana = int(tiempo // 24) % 7
-    return dia_semana >= 5
-
-def calcular_soc_inicial(hora_actual):
-    """Calcula el SoC inicial considerando el tráfico."""
+def duracion_y_consumo(distancia_km, hora_actual):
+    """Devuelve la duración y consumo para la distancia dada."""
     factor = trafico.factor_trafico(hora_actual)
-    if factor >= 1.3:
-        return random.uniform(10, 20)  # Tráfico muy congestionado
-    if factor >= 1.1:
-        return random.uniform(20, 30)  # Tráfico moderado
-    return random.uniform(30, 40)  # Tráfico ligero
+    ajuste = 1 + 0.2 * (factor - 1)
+    duracion = distancia_km / param_operacion.velocidad_promedio * ajuste
+    consumo = (
+        random.uniform(*param_operacion.consumo_kwh_km)
+        * distancia_km
+        * ajuste
+    )
+    return duracion, consumo
+
+
+def soc_estimado_despues(soc_actual, distancia_km, hora_actual):
+    """Calcula el SoC estimado tras la siguiente vuelta sin cambiar la batería."""
+    factor = trafico.factor_trafico(hora_actual)
+    ajuste = 1 + 0.2 * (factor - 1)
+    consumo_promedio = sum(param_operacion.consumo_kwh_km) / 2
+    consumo = consumo_promedio * distancia_km * ajuste
+    return soc_actual - consumo / param_bateria.capacidad * 100
 
 
 class EstacionIntercambio:
@@ -177,14 +184,13 @@ class EstacionIntercambio:
             self._ingreso_reserva.append(self.env.now)
             self.energia_total_cargada += capacidad_carga
             self.costo_total_electrico += costo_carga
-
-
-# Procesos para simular la salida inicial de autobuses
-def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=4):
+def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=37.2):
     """Genera la salida inicial de autobuses y crea procesos cíclicos.
 
+    ``tiempo_ruta`` indica la distancia de la ruta en kilómetros.
     Durante horas pico (7:00-9:00 y 16:00-18:00) la frecuencia base de
-    salida es de 6 minutos y en el resto del día de 12 minutos. Se
+    salida es de 3.5 minutos y en el resto del día de 10 minutos. Se
+
     introduce una variación aleatoria y posibles retrasos para reflejar la
     incertidumbre en la demanda de energía.
     """
@@ -192,9 +198,9 @@ def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=4):
     for autobuses_id in range(1, max_autobuses + 1):
         hora_actual = env.now % 24
         if 7 <= hora_actual < 9 or 16 <= hora_actual < 18:
-            intervalo_base = 0.1  # 6 minutos
+            intervalo_base = 3.5 / 60  # 3.5 minutos
         else:
-            intervalo_base = 0.2  # 12 minutos
+            intervalo_base = 10 / 60  # 10 minutos
 
         variacion = random.uniform(
             -param_simulacion.variacion_llegadas,
@@ -223,84 +229,85 @@ def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=4):
 
 # Proceso para simular el flujo del autobús
 def proceso_autobus(env, estacion, autobuses_id, tiempo_ruta, primera_salida=False):
-    """Simula un autobús que realiza su ruta y vuelve para intercambiar la batería."""
-    soc_inicial = param_bateria.soc_objetivo
-    hora_actual = int(env.now % 24)
+    """Simula un autobús realizando rutas cíclicas."""
+    soc_actual = param_bateria.soc_objetivo
     while True:
-        llegada = env.now
-        ultimo_aviso = env.now
-        while len(estacion.baterias_reserva.items) <= 0:
-            if VERBOSE and env.now - ultimo_aviso >= 10 / 60:
-                print(
-                    f"Autobús {autobuses_id} espera batería desde {formato_hora(llegada)}"
-                )
-                ultimo_aviso = env.now
-            yield env.timeout(1 / 60)
+        hora_actual = int(env.now % 24)
+        estimado = soc_estimado_despues(soc_actual, tiempo_ruta, hora_actual)
+        if primera_salida or estimado < 20:
+            llegada = env.now
+            ultimo_aviso = env.now
+            while len(estacion.baterias_reserva.items) <= 0:
+                if VERBOSE and env.now - ultimo_aviso >= 10 / 60:
+                    print(
+                        f"Autobús {autobuses_id} espera batería desde {formato_hora(llegada)}"
+                    )
+                    ultimo_aviso = env.now
+                yield env.timeout(1 / 60)
 
-        with estacion.estaciones.request() as req:
-            yield req
-            tiempo_espera = env.now - llegada
-            estacion.tiempo_espera_total += tiempo_espera
-            if VERBOSE:
-                if primera_salida:
-                    mensaje = "toma batería inicial"
+            with estacion.estaciones.request() as req:
+                yield req
+                tiempo_espera = env.now - llegada
+                estacion.tiempo_espera_total += tiempo_espera
+                if VERBOSE:
+                    if primera_salida:
+                        mensaje = "toma batería inicial"
+                    else:
+                        mensaje = "entra a la estación"
+                    print(
+                        f"Autobús {autobuses_id} {mensaje} en {formato_hora(env.now)} "
+                        f"tras esperar {formato_hora(tiempo_espera)}"
+                    )
+                _ = yield estacion.baterias_reserva.get()
+                ingreso = estacion._ingreso_reserva.pop(0)
+                estacion.tiempos_espera_baterias.append(env.now - ingreso)
+                if not primera_salida:
+                    yield estacion.baterias_descargadas.put(soc_actual)
+                    capacidad_requerida = (
+                        param_bateria.soc_objetivo - soc_actual
+                    ) / 100 * param_bateria.capacidad
                 else:
-                    mensaje = "entra a la estación"
-                print(
-                    f"Autobús {autobuses_id} {mensaje} en {formato_hora(env.now)} "
-                    f"tras esperar {formato_hora(tiempo_espera)}"
-                )
-            _ = yield estacion.baterias_reserva.get()
-            ingreso = estacion._ingreso_reserva.pop(0)
-            estacion.tiempos_espera_baterias.append(env.now - ingreso)
-            if not primera_salida:
-                yield estacion.baterias_descargadas.put(soc_inicial)
-                capacidad_requerida = (
-                    param_bateria.soc_objetivo - soc_inicial
-                ) / 100 * param_bateria.capacidad
-            else:
-                capacidad_requerida = 0
-            tiempo_reemplazo = 4 / 60
-            hora_final = env.now + tiempo_reemplazo
-            if VERBOSE and not primera_salida:
-                print(
-                    f"(SoC inicial: {soc_inicial:.2f}%). Hora final: {formato_hora(hora_final)}"
-                )
-            yield env.timeout(tiempo_reemplazo)
-            estacion.intercambios_realizados += 1
-            if not primera_salida:
-                dia_actual = int(env.now // 24)
-                hora_registro = formato_hora(env.now)
-                estacion.registro_intercambios.append(
-                    (dia_actual, hora_registro, capacidad_requerida)
-                )
-                if 7 <= hora_actual < 9 or 18 <= hora_actual < 20:
-                    estacion.energia_punta_autobuses += capacidad_requerida
-                else:
-                    estacion.energia_fuera_punta_autobuses += capacidad_requerida
-                if (
-                    param_economicos.horas_punta[0]
-                    <= hora_actual
-                    < param_economicos.horas_punta[1]
-                ):
-                    estacion.energia_punta_electrica += capacidad_requerida
-        primera_salida = False
+                    capacidad_requerida = 0
+                tiempo_reemplazo = 4 / 60
+                hora_final = env.now + tiempo_reemplazo
+                if VERBOSE and not primera_salida:
+                    print(
+                        f"(SoC inicial: {soc_actual:.2f}%). Hora final: {formato_hora(hora_final)}"
+                    )
+                yield env.timeout(tiempo_reemplazo)
+                estacion.intercambios_realizados += 1
+                if not primera_salida:
+                    dia_actual = int(env.now // 24)
+                    hora_registro = formato_hora(env.now)
+                    estacion.registro_intercambios.append(
+                        (dia_actual, hora_registro, capacidad_requerida)
+                    )
+                    if 7 <= hora_actual < 9 or 18 <= hora_actual < 20:
+                        estacion.energia_punta_autobuses += capacidad_requerida
+                    else:
+                        estacion.energia_fuera_punta_autobuses += capacidad_requerida
+                    if (
+                        param_economicos.horas_punta[0]
+                        <= hora_actual
+                        < param_economicos.horas_punta[1]
+                    ):
+                        estacion.energia_punta_electrica += capacidad_requerida
+                soc_actual = param_bateria.soc_objetivo
+                primera_salida = False
 
-        # El autobús sale a su ruta y regresa con la batería descargada
-        duracion_ruta = tiempo_ruta * 2 if es_fin_de_semana(env.now) else tiempo_ruta
+        # El autobús sale a su ruta
         hora_inicio_ruta = int(env.now % 24)
-        factor = trafico.factor_trafico(hora_inicio_ruta)
+        duracion_ruta, consumo = duracion_y_consumo(tiempo_ruta, hora_inicio_ruta)
         yield env.timeout(duracion_ruta)
-        # Consumo de gas equivalente durante la ruta ajustado por el tráfico
-        energia_gas = param_operacion.consumo_gas_hora * duracion_ruta * factor
+        energia_gas = param_operacion.consumo_gas_hora * duracion_ruta * trafico.factor_trafico(hora_inicio_ruta)
         estacion.energia_total_gas += energia_gas
         estacion.costo_total_gas += energia_gas * param_economicos.costo_gas_kwh
+        soc_actual = max(0, soc_actual - consumo / param_bateria.capacidad * 100)
         hora_actual = int(env.now % 24)
-        soc_inicial = calcular_soc_inicial(hora_actual)
         if VERBOSE:
             print(
                 f"Autobús {autobuses_id} regresa a la estación en {formato_hora(env.now)} "
-                f"con SoC {soc_inicial:.2f}%"
+                f"con SoC {soc_actual:.2f}%"
             )
 
 
@@ -308,13 +315,14 @@ def proceso_autobus(env, estacion, autobuses_id, tiempo_ruta, primera_salida=Fal
 def ejecutar_simulacion(
     max_autobuses=param_simulacion.max_autobuses,
     duracion=param_simulacion.duracion,
-    tiempo_ruta=4,
+    tiempo_ruta=37.2,
     procesos_extra=None,
 ):
     """Ejecuta la simulación y devuelve la estación resultante.
 
-    ``tiempo_ruta`` indica la duración en horas de la ruta de cada autobús
-    antes de volver a solicitar un intercambio de batería.
+    ``tiempo_ruta`` representa la distancia en kilómetros de la ruta de cada
+    autobús antes de regresar a la estación. El tiempo real se calcula a partir
+    de esta distancia y de la velocidad promedio ajustada por el tráfico.
     """
     random.seed(param_simulacion.semilla)
     env = simpy.Environment()

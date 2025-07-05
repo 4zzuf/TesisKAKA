@@ -61,7 +61,7 @@ def grafico_carga_bateria(block: bool = True):
     plt.show(block=block)
 
 
-def _costos_para_autobuses(numero_autobuses, tiempo_ruta=4):
+def _costos_para_autobuses(numero_autobuses, tiempo_ruta=37.2):
     """Devuelve costos y consumos para la cantidad dada de autobuses."""
     anterior = modelo.VERBOSE
     modelo.VERBOSE = False
@@ -87,10 +87,11 @@ def _costos_para_autobuses(numero_autobuses, tiempo_ruta=4):
     return costo_electrico, costo_gas, energia_punta, energia_fuera
 
 
-def costo_gas_teorico(numero_autobuses, tiempo_ruta=4):
+def costo_gas_teorico(numero_autobuses, tiempo_ruta=37.2):
     """Calcula el costo de operar los autobuses con gas natural."""
-    ciclos = param_simulacion.duracion / tiempo_ruta
-    energia_total = numero_autobuses * param_operacion.consumo_gas_hora * tiempo_ruta * ciclos
+    duracion = tiempo_ruta / param_operacion.velocidad_promedio
+    ciclos = param_simulacion.duracion / duracion
+    energia_total = numero_autobuses * param_operacion.consumo_gas_hora * duracion * ciclos
     return energia_total * param_economicos.costo_gas_kwh
 
 

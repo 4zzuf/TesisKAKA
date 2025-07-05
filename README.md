@@ -19,10 +19,19 @@ pip install -r requirements.txt
 
 main
 La estación cuenta con 21 cargadores y 41 baterías (33 de ellas cargadas al
-inicio).
-Durante los fines de semana la demanda de autobuses se reduce a la mitad,
-por lo que cada ruta dura ocho horas en lugar de cuatro. Las horas de entrada
-y salida se registran en formato ``hh:mm``.
+inicio). Las rutas cubren una distancia aproximada de 37.2 km. El tiempo que
+demora cada autobús depende de su velocidad promedio (30 km/h) y de un pequeño
+ajuste por el tráfico, de modo que los valores ya no se fijan en cuatro u ocho
+horas. Las horas de entrada y salida se registran en formato ``hh:mm``.
+
+La frecuencia de salida de autobuses ahora incluye variaciones
+aleatorias para reflejar la demanda real y posibles retrasos por
+congestión o incidentes. Durante las horas punta los intervalos
+promedio son de 3.5 minutos y el resto del día de 10 minutos, pero cada
+salida puede adelantarse o retrasarse unos minutos. Cada autobús toma
+una batería cargada de la reserva al iniciar su primer recorrido. Desde
+entonces la reemplaza solo si se estima que al terminar la siguiente
+vuelta quedará con menos de 20 % de carga.
 
 La frecuencia de salida de autobuses ahora incluye variaciones
 aleatorias para reflejar la demanda real y posibles retrasos por
@@ -37,9 +46,10 @@ su ruta y regresan más tarde para cambiar la batería.
 
 Ejecuta el script `tiempos_intercambio.py` para visualizar el tiempo de
 intercambio promedio de la estación según el número de autobuses. Cada vehículo
-efectúa una ruta de cuatro horas y regresa con la batería al 30‑40 % de carga para
-un nuevo intercambio. El valor mostrado incluye la espera en cola y el
-reemplazo de 4 minutos, expresado en minutos:
+cubre 37.2 km por ciclo y cambia la batería únicamente cuando se prevé que la
+próxima vuelta terminará con menos del 20 % de carga. El valor mostrado incluye
+la espera en cola y el reemplazo de
+4 minutos, expresado en minutos:
 
 ```bash
 python tiempos_intercambio.py
