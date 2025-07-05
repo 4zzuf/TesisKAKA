@@ -28,19 +28,16 @@ La frecuencia de salida de autobuses ahora incluye variaciones
 aleatorias para reflejar la demanda real y posibles retrasos por
 congestión o incidentes. Durante las horas punta los intervalos
 promedio son de 3.5 minutos y el resto del día de 10 minutos, pero cada
-salida puede adelantarse o retrasarse unos minutos. Cada autobús toma
-una batería cargada de la reserva al iniciar su primer recorrido. Desde
-entonces la reemplaza solo si se estima que al terminar la siguiente
-vuelta quedará con menos de 20 % de carga.
 
-La frecuencia de salida de autobuses ahora incluye variaciones
-aleatorias para reflejar la demanda real y posibles retrasos por
-congestión o incidentes. Durante las horas punta los intervalos
-promedio siguen siendo de seis minutos, mientras que el resto del día
-son de doce minutos, pero cada salida puede adelantarse o atrasarse
-unos minutos. Cada autobús toma una batería cargada de la reserva al
-iniciar su primer recorrido. Todos parten de la estación para cumplir
-su ruta y regresan más tarde para cambiar la batería.
+salida puede adelantarse o retrasarse unos minutos. Los fines de semana
+la frecuencia base disminuye: los sábados opera al 70 % y los domingos
+al 50 % de lo habitual. Cada autobús toma una batería cargada de la
+reserva al iniciar su primer recorrido. Desde entonces la reemplaza sólo
+si se estima que al terminar la siguiente
+vuelta quedará con menos de 20 % de carga.
+Si la batería llega en plena hora punta eléctrica y hay suficientes
+baterías cargadas para cubrir la demanda hasta que finalice la franja,
+su recarga se pospone para ahorrar costos.
 
 ## Gráfico de eficiencia operativa
 

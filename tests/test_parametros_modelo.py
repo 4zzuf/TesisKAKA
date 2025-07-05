@@ -62,3 +62,12 @@ def test_ejecutar_simulacion_basic_flow(monkeypatch):
     assert events['process'] is True
     assert events['run_until'] == 5
     assert events['llegada'] == (2, 1)
+
+
+def test_inventario_suficiente_hasta_fin_punta(monkeypatch):
+    estacion = types.SimpleNamespace(baterias_reserva=types.SimpleNamespace(items=[0]*25))
+    assert modelo.inventario_suficiente_hasta_fin_punta(estacion, 19) is True
+    estacion.baterias_reserva.items = [0]*10
+    assert modelo.inventario_suficiente_hasta_fin_punta(estacion, 19) is False
+    # Fuera de hora punta siempre es True
+    assert modelo.inventario_suficiente_hasta_fin_punta(estacion, 12) is True

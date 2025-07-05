@@ -29,6 +29,22 @@ def formato_hora(horas_decimales):
     horas, minutos = divmod(horas_totales * 60, 60)
     return f"Día {dia:02} {int(horas):02}:{int(minutos):02}"
 
+def es_fin_de_semana(tiempo):
+    """Devuelve ``True`` si la hora indicada corresponde a fin de semana."""
+    dia_semana = int(tiempo // 24) % 7
+    return dia_semana >= 5
+
+
+def factor_demanda(tiempo):
+    """Factor de frecuencia de autobuses según el día de la semana."""
+    dia_semana = int(tiempo // 24) % 7
+    if dia_semana == 5:
+        return 0.7  # Sábado
+    if dia_semana == 6:
+        return 0.5  # Domingo
+    return 1.0
+
+
 def duracion_y_consumo(distancia_km, hora_actual):
     """Devuelve la duración y consumo para la distancia dada."""
     factor = trafico.factor_trafico(hora_actual)
@@ -41,7 +57,6 @@ def duracion_y_consumo(distancia_km, hora_actual):
     )
     return duracion, consumo
 
-
 def soc_estimado_despues(soc_actual, distancia_km, hora_actual):
     """Calcula el SoC estimado tras la siguiente vuelta sin cambiar la batería."""
     factor = trafico.factor_trafico(hora_actual)
@@ -50,6 +65,12 @@ def soc_estimado_despues(soc_actual, distancia_km, hora_actual):
     consumo = consumo_promedio * distancia_km * ajuste
     return soc_actual - consumo / param_bateria.capacidad * 100
 
+def inventario_suficiente_hasta_fin_punta(estacion, hora_actual):
+    """Devuelve ``True`` si no es necesario cargar de inmediato."""
+    inicio, fin = param_economicos.horas_punta
+    if hora_actual < inicio or hora_actual >= fin:
+        return True
+    return len(estacion.baterias_reserva.items) > param_simulacion.max_autobuses
 
 class EstacionIntercambio:
     def __init__(self, env, capacidad_estacion):
@@ -155,6 +176,18 @@ class EstacionIntercambio:
                 yield self.env.timeout(1 / 60)
                 continue
 
+            hora_actual = self.env.now % 24
+            if not inventario_suficiente_hasta_fin_punta(self, hora_actual):
+                espera = param_economicos.horas_punta[1] - hora_actual
+                if espera < 0:
+                    espera += 24
+                if VERBOSE:
+                    print(
+                        f"Retrasando carga hasta {formato_hora(self.env.now + espera)}"
+                    )
+                yield self.env.timeout(espera)
+                continue
+
             soc_actual = yield self.baterias_descargadas.get()
             self.baterias_cargando += 1
 
@@ -191,6 +224,13 @@ def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=37.2):
     Durante horas pico (7:00-9:00 y 16:00-18:00) la frecuencia base de
     salida es de 3.5 minutos y en el resto del día de 10 minutos. Se
 
+# Procesos para simular la salida inicial de autobuses
+def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=37.2):
+    """Genera la salida inicial de autobuses y crea procesos cíclicos.
+
+    ``tiempo_ruta`` indica la distancia de la ruta en kilómetros.
+    Durante horas pico (7:00-9:00 y 16:00-18:00) la frecuencia base de
+    salida es de 3.5 minutos y en el resto del día de 10 minutos. Se
     introduce una variación aleatoria y posibles retrasos para reflejar la
     incertidumbre en la demanda de energía.
     """
@@ -201,7 +241,6 @@ def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=37.2):
             intervalo_base = 3.5 / 60  # 3.5 minutos
         else:
             intervalo_base = 10 / 60  # 10 minutos
-
         variacion = random.uniform(
             -param_simulacion.variacion_llegadas,
             param_simulacion.variacion_llegadas,
