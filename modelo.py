@@ -179,7 +179,12 @@ class EstacionIntercambio:
                 continue
 
             hora_actual = self.env.now % 24
-            if inventario_suficiente_hasta_fin_punta(self, hora_actual):
+            if (
+                param_economicos.horas_punta[0]
+                <= hora_actual
+                < param_economicos.horas_punta[1]
+                and inventario_suficiente_hasta_fin_punta(self, hora_actual)
+            ):
                 espera = param_economicos.horas_punta[1] - hora_actual
                 if espera < 0:
                     espera += 24
