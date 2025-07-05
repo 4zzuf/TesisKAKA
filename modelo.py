@@ -73,7 +73,20 @@ def inventario_suficiente_hasta_fin_punta(estacion, hora_actual):
     if hora_actual < inicio or hora_actual >= fin:
         return True
     return len(estacion.baterias_reserva.items) > param_simulacion.max_autobuses
+def soc_estimado_despues(soc_actual, distancia_km, hora_actual):
+    """Calcula el SoC estimado tras la siguiente vuelta sin cambiar la batería."""
+    factor = trafico.factor_trafico(hora_actual)
+    ajuste = 1 + 0.2 * (factor - 1)
+    consumo_promedio = sum(param_operacion.consumo_kwh_km) / 2
+    consumo = consumo_promedio * distancia_km * ajuste
+    return soc_actual - consumo / param_bateria.capacidad * 100
 
+def inventario_suficiente_hasta_fin_punta(estacion, hora_actual):
+    """Devuelve ``True`` si no es necesario cargar de inmediato."""
+    inicio, fin = param_economicos.horas_punta
+    if hora_actual < inicio or hora_actual >= fin:
+        return True
+    return len(estacion.baterias_reserva.items) > param_simulacion.max_autobuses
 
 class EstacionIntercambio:
     def __init__(self, env, capacidad_estacion):
@@ -220,8 +233,6 @@ class EstacionIntercambio:
             self._ingreso_reserva.append(self.env.now)
             self.energia_total_cargada += capacidad_carga
             self.costo_total_electrico += costo_carga
-
-
 # Procesos para simular la salida inicial de autobuses
 def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=37.2):
     """Genera la salida inicial de autobuses y crea procesos cíclicos.
@@ -239,9 +250,7 @@ def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=37.2):
             intervalo_base = 3.5 / 60  # 3.5 minutos
         else:
             intervalo_base = 10 / 60  # 10 minutos
-
         intervalo_base /= factor_demanda(env.now)
-
         variacion = random.uniform(
             -param_simulacion.variacion_llegadas,
             param_simulacion.variacion_llegadas,
@@ -265,8 +274,6 @@ def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=37.2):
                 primera_salida=True,
             )
         )
-
-
 # Proceso para simular el flujo del autobús
 def proceso_autobus(env, estacion, autobuses_id, tiempo_ruta, primera_salida=False):
     """Simula un autobús realizando rutas cíclicas."""
