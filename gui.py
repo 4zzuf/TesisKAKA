@@ -102,10 +102,10 @@ class SimulacionWindow(QtWidgets.QWidget):
         layout.addRow("Bater\u00edas iniciales", self.baterias_iniciales)
 
         self.tiempo_ruta = QtWidgets.QDoubleSpinBox()
-        self.tiempo_ruta.setRange(0.1, 24.0)
-        self.tiempo_ruta.setSingleStep(0.5)
-        self.tiempo_ruta.setValue(4.0)
-        layout.addRow("Tiempo ruta (h)", self.tiempo_ruta)
+        self.tiempo_ruta.setRange(1.0, 100.0)
+        self.tiempo_ruta.setSingleStep(1.0)
+        self.tiempo_ruta.setValue(37.2)
+        layout.addRow("Distancia ruta (km)", self.tiempo_ruta)
 
         self.progreso = QtWidgets.QProgressBar()
         self.progreso.setRange(0, 100)
