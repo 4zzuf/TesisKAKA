@@ -184,15 +184,13 @@ class EstacionIntercambio:
             self._ingreso_reserva.append(self.env.now)
             self.energia_total_cargada += capacidad_carga
             self.costo_total_electrico += costo_carga
-
-
-# Procesos para simular la salida inicial de autobuses
 def llegada_autobuses(env, estacion, max_autobuses, tiempo_ruta=37.2):
     """Genera la salida inicial de autobuses y crea procesos cíclicos.
 
     ``tiempo_ruta`` indica la distancia de la ruta en kilómetros.
     Durante horas pico (7:00-9:00 y 16:00-18:00) la frecuencia base de
     salida es de 3.5 minutos y en el resto del día de 10 minutos. Se
+
     introduce una variación aleatoria y posibles retrasos para reflejar la
     incertidumbre en la demanda de energía.
     """

@@ -33,6 +33,15 @@ una batería cargada de la reserva al iniciar su primer recorrido. Desde
 entonces la reemplaza solo si se estima que al terminar la siguiente
 vuelta quedará con menos de 20 % de carga.
 
+La frecuencia de salida de autobuses ahora incluye variaciones
+aleatorias para reflejar la demanda real y posibles retrasos por
+congestión o incidentes. Durante las horas punta los intervalos
+promedio siguen siendo de seis minutos, mientras que el resto del día
+son de doce minutos, pero cada salida puede adelantarse o atrasarse
+unos minutos. Cada autobús toma una batería cargada de la reserva al
+iniciar su primer recorrido. Todos parten de la estación para cumplir
+su ruta y regresan más tarde para cambiar la batería.
+
 ## Gráfico de eficiencia operativa
 
 Ejecuta el script `tiempos_intercambio.py` para visualizar el tiempo de
