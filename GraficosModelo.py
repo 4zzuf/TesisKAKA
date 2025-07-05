@@ -245,12 +245,13 @@ def grafico_inventario(block: bool = True):
         return
     _, datos = _simular_con_registro()
     horas = range(len(datos["cargadas"]))
+    dias = [h / 24 for h in horas]
 
     plt.style.use(ESTILO_MEJOR)
     plt.figure(figsize=(8, 4))
-    plt.plot(horas, datos["cargadas"], label="Cargadas")
-    plt.plot(horas, datos["descargadas"], label="Descargadas")
-    plt.xlabel("Hora de simulación")
+    plt.plot(dias, datos["cargadas"], label="Cargadas")
+    plt.plot(dias, datos["descargadas"], label="Descargadas")
+    plt.xlabel("Día de simulación")
     plt.ylabel("Número de baterías")
     plt.title("Inventario de baterías")
     plt.legend()
@@ -272,11 +273,12 @@ def grafico_cola(block: bool = True):
     for i in range(1, len(espera)):
         espera_h.append((espera[i] - espera[i - 1]) * 60)
     horas = range(len(espera_h))
+    dias = [h / 24 for h in horas]
 
     plt.style.use(ESTILO_MEJOR)
     plt.figure(figsize=(8, 4))
-    plt.plot(horas, espera_h, marker="o")
-    plt.xlabel("Hora de simulación")
+    plt.plot(dias, espera_h, marker="o")
+    plt.xlabel("Día de simulación")
     plt.ylabel("Minutos de espera nuevos")
     plt.title("Evolución de la cola de autobuses")
     plt.grid(True)
@@ -331,14 +333,15 @@ def grafico_uso_cargadores(block: bool = True):
         return
     _, datos = _simular_con_registro()
     horas = range(len(datos["cargando"]))
+    dias = [h / 24 for h in horas]
     uso = [
         c / param_estacion.capacidad_estacion * 100 for c in datos["cargando"]
     ]
 
     plt.style.use(ESTILO_MEJOR)
     plt.figure(figsize=(8, 4))
-    plt.plot(horas, uso, marker="o")
-    plt.xlabel("Hora de simulación")
+    plt.plot(dias, uso, marker="o")
+    plt.xlabel("Día de simulación")
     plt.ylabel("Uso de cargadores (%)")
     plt.title("Utilización de cargadores")
     plt.grid(True)
