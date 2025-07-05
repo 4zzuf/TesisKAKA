@@ -73,20 +73,6 @@ def inventario_suficiente_hasta_fin_punta(estacion, hora_actual):
     if hora_actual < inicio or hora_actual >= fin:
         return True
     return len(estacion.baterias_reserva.items) > param_simulacion.max_autobuses
-def soc_estimado_despues(soc_actual, distancia_km, hora_actual):
-    """Calcula el SoC estimado tras la siguiente vuelta sin cambiar la batería."""
-    factor = trafico.factor_trafico(hora_actual)
-    ajuste = 1 + 0.2 * (factor - 1)
-    consumo_promedio = sum(param_operacion.consumo_kwh_km) / 2
-    consumo = consumo_promedio * distancia_km * ajuste
-    return soc_actual - consumo / param_bateria.capacidad * 100
-
-def inventario_suficiente_hasta_fin_punta(estacion, hora_actual):
-    """Devuelve ``True`` si no es necesario cargar de inmediato."""
-    inicio, fin = param_economicos.horas_punta
-    if hora_actual < inicio or hora_actual >= fin:
-        return True
-    return len(estacion.baterias_reserva.items) > param_simulacion.max_autobuses
 
 class EstacionIntercambio:
     def __init__(self, env, capacidad_estacion):
@@ -193,7 +179,7 @@ class EstacionIntercambio:
                 continue
 
             hora_actual = self.env.now % 24
-            if not inventario_suficiente_hasta_fin_punta(self, hora_actual):
+            if inventario_suficiente_hasta_fin_punta(self, hora_actual):
                 espera = param_economicos.horas_punta[1] - hora_actual
                 if espera < 0:
                     espera += 24

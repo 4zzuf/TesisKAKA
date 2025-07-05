@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 
 main
-La estación cuenta con 21 cargadores y 41 baterías (33 de ellas cargadas al
+La estación cuenta con 21 cargadores y 41 baterías (20 de ellas cargadas al
 inicio). Las rutas cubren una distancia aproximada de 37.2 km. El tiempo que
 demora cada autobús depende de su velocidad promedio (30 km/h) y de un pequeño
 ajuste por el tráfico, de modo que los valores ya no se fijan en cuatro u ocho
