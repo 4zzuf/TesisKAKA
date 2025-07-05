@@ -28,6 +28,7 @@ La frecuencia de salida de autobuses ahora incluye variaciones
 aleatorias para reflejar la demanda real y posibles retrasos por
 congestión o incidentes. Durante las horas punta los intervalos
 promedio son de 3.5 minutos y el resto del día de 10 minutos, pero cada
+
 salida puede adelantarse o retrasarse unos minutos. Los fines de semana
 la frecuencia base disminuye: los sábados opera al 70 % y los domingos
 al 50 % de lo habitual. Cada autobús toma una batería cargada de la
