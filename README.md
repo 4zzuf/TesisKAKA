@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 
 main
-La estación cuenta con 21 cargadores y 41 baterías (33 de ellas cargadas al
+La estación cuenta con 21 cargadores y 41 baterías (20 de ellas cargadas al
 inicio). Las rutas cubren una distancia aproximada de 37.2 km. El tiempo que
 demora cada autobús depende de su velocidad promedio (30 km/h) y de un pequeño
 ajuste por el tráfico, de modo que los valores ya no se fijan en cuatro u ocho
@@ -82,11 +82,11 @@ según la cantidad de autobuses evaluada. De esta manera no se genera la caída 
 costos al pasar de cuatro a cinco vehículos ni la estabilización por encima de
 diez.
 
-El costo de operar con gas natural se calcula aparte empleando el consumo
-promedio de cada autobús y no depende de los valores de electricidad. Para
-estas simulaciones se considera un uso de 100 kWh por hora, lo que equivale a
-unos 200 000 kWh para una flota de veinte vehículos durante 21 días de
-operación.
+El costo de operar con gas natural se calcula aparte a partir de la distancia
+recorrida y no depende del consumo eléctrico. Cada autobús utiliza 70 m³ de gas
+por cada 100 km y el precio de venta es de S/. 1.35 por metro cúbico. Para una
+flota de veinte vehículos durante 21 días esto representa unos 26 000 m³ en
+total.
 
 Ejecuta:
 
