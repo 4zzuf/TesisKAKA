@@ -32,8 +32,8 @@ def main():
     parser.add_argument(
         "--tiempo-ruta",
         type=float,
-        default=4,
-        help="Duración de cada ruta antes de regresar a la estación",
+        default=37.2,
+        help="Distancia de la ruta en kilómetros",
     )
     args = parser.parse_args()
 
